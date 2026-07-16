@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FFFDF7">
+<title>Parcero · Español pa' Colombia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFDF7;--card:#FFFFFF;--ink:#211D33;--sub:#7A7590;--line:#EFE9DC;
+  --emerald:#06B981;--emerald-d:#04966A;--gold:#FFC400;--gold-d:#E0A400;
+  --coral:#FF5A5F;--coral-d:#E23B45;--sky:#2D6BFF;--sky-d:#1C50D6;
+  --locked:#DAD4C7;--locked-d:#C3BCAB;--radius:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:700;overscroll-behavior-y:none}
+h1,h2,h3,h4,.display{font-family:'Baloo 2',sans-serif;font-weight:800;letter-spacing:.2px}
+.wrap{max-width:520px;margin:0 auto}
+.screen{display:none;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.screen.active{display:block}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.btn3d{border:none;border-radius:16px;font-family:'Baloo 2';font-weight:800;font-size:17px;color:#fff;padding:14px 20px;cursor:pointer;position:relative;width:100%;background:var(--emerald);box-shadow:0 5px 0 var(--emerald-d);transition:transform .06s,box-shadow .06s;text-transform:uppercase;letter-spacing:.5px}
+.btn3d:active{transform:translateY(4px);box-shadow:0 1px 0 var(--emerald-d)}
+.btn3d.gold{background:var(--gold);color:#5A4200;box-shadow:0 5px 0 var(--gold-d)}
+.btn3d.sky{background:var(--sky);box-shadow:0 5px 0 var(--sky-d)}
+.btn3d.ghost{background:#fff;color:var(--emerald);box-shadow:0 3px 0 var(--line);border:2px solid var(--line)}
+.btn3d.coral{background:var(--coral);box-shadow:0 5px 0 var(--coral-d)}
+.btn3d:disabled{background:var(--locked);box-shadow:0 5px 0 var(--locked-d);color:#fff;cursor:default}
+
+.hud{position:sticky;top:0;z-index:30;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line)}
+.hud .flag{font-size:26px}
+.hud .metric{display:flex;align-items:center;gap:5px;font-family:'Baloo 2';font-weight:800;font-size:17px}
+.hud .metric.streak{color:var(--coral)}.hud .metric.gems{color:var(--sky)}.hud .metric.heart{color:var(--coral);margin-left:auto}
+.hud .metric .ico{font-size:20px}
+
+.unit{margin:22px 16px 8px;border-radius:var(--radius);padding:16px 18px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.unit .lbl{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;opacity:.85}
+.unit h2{font-size:22px;margin-top:1px}
+.unit p{font-size:13.5px;opacity:.9;margin-top:2px;font-weight:700}
+.unit.u1{background:linear-gradient(135deg,#06B981,#04966A)}
+.unit.u2{background:linear-gradient(135deg,#2D6BFF,#1C50D6)}
+.unit.u3{background:linear-gradient(135deg,#FF7A45,#E8474B)}
+.unit .guia{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);border-radius:12px;padding:8px 10px;font-size:22px}
+
+.path{position:relative;padding:8px 0 10px}
+.node-row{position:relative;z-index:1;display:flex;justify-content:center;margin:6px 0}
+.node{width:78px;height:70px;border-radius:50%;border:none;cursor:pointer;position:relative;font-size:32px;display:flex;align-items:center;justify-content:center;transition:transform .1s;background:none}
+.node .ring{position:absolute;inset:0;border-radius:50%}
+.node .body{position:absolute;inset:6px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.node:active{transform:translateY(3px)}
+.node.done .ring{background:var(--emerald-d)}.node.done .body{background:var(--emerald);box-shadow:inset 0 -4px 0 rgba(0,0,0,.12)}
+.node.current .ring{background:var(--gold-d)}.node.current .body{background:var(--gold);box-shadow:inset 0 -4px 0 rgba(0,0,0,.12)}
+.node.locked .ring{background:var(--locked-d)}.node.locked .body{background:var(--locked)}
+.node.locked{cursor:default}
+.node .chk{position:absolute;bottom:-2px;right:-2px;background:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 5px rgba(0,0,0,.15)}
+.node.current::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:4px solid var(--gold);animation:halo 1.6s ease-in-out infinite;opacity:.5}
+@keyframes halo{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.12);opacity:0}}
+.startbubble{position:absolute;left:50%;transform:translateX(-50%);top:-42px;z-index:2;background:#fff;border:2px solid var(--line);border-radius:14px;padding:7px 12px;font-family:'Baloo 2';font-weight:800;color:var(--emerald);font-size:13px;white-space:nowrap;box-shadow:0 4px 0 var(--line);animation:bob 2s ease-in-out infinite}
+.startbubble::after{content:'';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:#fff}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
+.mascot{position:absolute;width:52px;height:52px;z-index:2;right:calc(50% - 96px);top:8px}
+.mascot .bear{width:100%;height:100%;background:#6B4A2E;border-radius:50% 50% 46% 46%;position:relative;box-shadow:inset 0 -5px 0 rgba(0,0,0,.15)}
+.mascot .ear{position:absolute;width:20px;height:20px;background:#6B4A2E;border-radius:50%;top:-4px}
+.mascot .ear.l{left:0}.mascot .ear.r{right:0}
+.mascot .snout{position:absolute;width:26px;height:20px;background:#E8D9C3;border-radius:50%;bottom:6px;left:50%;transform:translateX(-50%)}
+.mascot .glass{position:absolute;width:17px;height:17px;border:3px solid #F5E9D0;border-radius:50%;top:16px}
+.mascot .glass.l{left:6px}.mascot .glass.r{right:6px}
+.mascot .eye{position:absolute;width:5px;height:5px;background:#211D33;border-radius:50%;top:22px}
+.mascot .eye.l{left:12px}.mascot .eye.r{right:12px}
+.mascot .nose{position:absolute;width:8px;height:6px;background:#211D33;border-radius:50%;bottom:16px;left:50%;transform:translateX(-50%)}
+
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:flex;padding:8px 8px calc(8px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto}
+.tab{flex:1;background:none;border:none;font-family:'Baloo 2';font-weight:800;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;text-transform:uppercase;letter-spacing:.5px}
+.tab .ico{font-size:24px;line-height:1;filter:grayscale(1);opacity:.55}
+.tab.on{color:var(--emerald)}.tab.on .ico{filter:none;opacity:1}
+
+.hub-hero{padding:20px 18px 4px}
+.hub-hero .back{background:#fff;border:2px solid var(--line);border-radius:12px;width:44px;height:44px;font-size:20px;box-shadow:0 3px 0 var(--line)}
+.hub-hero h1{font-size:28px;margin:14px 0 2px}
+.hub-hero p{color:var(--sub);font-size:15px}
+.hub-sec{margin:22px 18px 8px;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:0 16px 12px;padding:16px;box-shadow:0 3px 0 var(--line);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .1s}
+.card:active{transform:translateY(2px)}
+.card .emoji{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+.card .txt{flex:1}.card .txt h3{font-size:18px}.card .txt span{color:var(--sub);font-size:13.5px;font-weight:700}
+.card .go{font-size:22px;color:var(--emerald)}
+.card.lesson .emoji{background:#E7FAF2}.card.rp1 .emoji{background:#E9F0FF}.card.rp2 .emoji{background:#FFF3D6}.card.rp3 .emoji{background:#F1EAFF}
+
+.overlay{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column}
+.overlay.active{display:flex}
+.les-top{display:flex;align-items:center;gap:14px;padding:calc(12px + env(safe-area-inset-top)) 16px 8px}
+.les-top .x{background:none;border:none;font-size:26px;color:var(--locked-d);font-weight:800}
+.progtrack{flex:1;height:16px;background:#EDE7DB;border-radius:999px;overflow:hidden}
+.progtrack i{display:block;height:100%;background:var(--emerald);border-radius:999px;transition:width .35s;box-shadow:inset 0 -4px 0 rgba(0,0,0,.1)}
+.les-top .hp{color:var(--coral);font-family:'Baloo 2';font-weight:800;display:flex;align-items:center;gap:4px}
+.les-body{flex:1;overflow-y:auto;padding:14px 22px;display:flex;flex-direction:column;justify-content:center}
+.les-kicker{font-size:14px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px}
+.vocab-big{text-align:center;padding:10px 0}
+.vocab-big .emoji{font-size:60px}
+.vocab-big .es{font-family:'Baloo 2';font-size:34px;color:var(--ink);margin:14px 0 6px;line-height:1.15}
+.vocab-big .pt{color:var(--sub);font-size:17px}
+.vocab-big .speak{margin:20px auto 0;background:var(--sky);border:none;box-shadow:0 5px 0 var(--sky-d);color:#fff;width:74px;height:74px;border-radius:50%;font-size:30px}
+.vocab-big .speak:active{transform:translateY(4px);box-shadow:0 1px 0 var(--sky-d)}
+.tipbox{background:#fff;border:2px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 4px 0 var(--line)}
+.tipbox .tag{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:999px;margin-bottom:10px}
+.tipbox.colomb .tag{background:#E7FAF2;color:var(--emerald-d)}.tipbox.falso .tag{background:#FFE7E8;color:var(--coral-d)}
+.tipbox h3{font-size:22px;margin-bottom:6px}.tipbox h3 em{font-style:normal;color:var(--coral)}.tipbox h3 b{color:var(--emerald)}
+.tipbox p{color:var(--sub);font-size:15px;font-weight:700;line-height:1.45}
+.q-head{font-family:'Baloo 2';font-size:22px;margin-bottom:18px;text-align:center}
+.q-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:15px 16px;font-family:'Nunito';font-weight:800;font-size:16px;color:var(--ink);margin-bottom:11px;box-shadow:0 3px 0 var(--line);cursor:pointer;transition:transform .06s}
+.q-opt:active{transform:translateY(2px)}
+.q-opt .kbd{width:26px;height:26px;border:2px solid var(--line);border-radius:8px;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--sub);flex-shrink:0}
+.q-opt.sel{border-color:var(--sky);box-shadow:0 3px 0 var(--sky-d)}.q-opt.sel .kbd{border-color:var(--sky);color:var(--sky)}
+.q-opt.right{border-color:var(--emerald);background:#E7FAF2;box-shadow:0 3px 0 var(--emerald-d)}
+.q-opt.wrong{border-color:var(--coral);background:#FFE7E8;box-shadow:0 3px 0 var(--coral-d)}
+.les-foot{padding:14px 18px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
+.feedback{display:none;padding:14px 18px 6px}.feedback.show{display:block}
+.feedback h4{font-family:'Baloo 2';font-size:20px;display:flex;align-items:center;gap:8px}
+.feedback p{font-size:14px;font-weight:700;margin-top:2px}
+.feedback.ok{color:var(--emerald-d)}.feedback.bad{color:var(--coral-d)}
+.combo{position:fixed;top:30%;left:50%;transform:translateX(-50%) scale(0);z-index:70;font-family:'Baloo 2';font-size:40px;color:var(--gold);text-shadow:0 3px 0 var(--gold-d);pointer-events:none}
+.combo.pop{animation:combo .8s ease}
+@keyframes combo{0%{transform:translateX(-50%) scale(0)}30%{transform:translateX(-50%) scale(1.2)}100%{transform:translateX(-50%) scale(1);opacity:0}}
+.done-screen{text-align:center;padding:30px 20px}
+.done-screen .big{font-size:80px;animation:bob 2s ease-in-out infinite}
+.done-screen h1{font-size:32px;margin:14px 0 6px}.done-screen p{color:var(--sub);font-size:16px}
+.reward{display:flex;gap:12px;justify-content:center;margin:22px 0}
+.reward .r{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 20px;box-shadow:0 4px 0 var(--line)}
+.reward .r .v{font-family:'Baloo 2';font-size:26px}
+.reward .r.xp .v{color:var(--gold-d)}.reward .r.combo2 .v{color:var(--emerald)}
+.reward .r span{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:1px}
+
+.chat-top{display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line);background:#fff}
+.chat-top .x{background:none;border:none;font-size:26px;color:var(--locked-d);font-weight:800}
+.chat-top .av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:#F1EAFF}
+.chat-top .who h3{font-size:17px;line-height:1.1}
+.chat-top .who span{font-size:12.5px;color:var(--emerald);font-weight:800}
+.chat-scroll{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:11px;background:var(--bg)}
+.msg{max-width:85%;padding:11px 14px;border-radius:18px;font-size:15.5px;font-weight:700;line-height:1.4}
+.msg.them{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start;box-shadow:0 2px 0 var(--line)}
+.msg.me{background:var(--sky);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.msg .dica{display:block;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;color:var(--coral-d);font-weight:800}
+.msg .sug{display:block;margin-top:5px;font-size:13px;color:var(--emerald-d);font-weight:800}
+.msg .replay{margin-left:8px;cursor:pointer;opacity:.6}
+.chat-foot{padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.mic{background:var(--coral);border:none;color:#fff;width:60px;height:60px;border-radius:50%;font-size:26px;flex-shrink:0;box-shadow:0 4px 0 var(--coral-d)}
+.mic:active{transform:translateY(3px);box-shadow:0 1px 0 var(--coral-d)}
+.mic.rec{animation:pulso 1.1s infinite}
+@keyframes pulso{0%{box-shadow:0 4px 0 var(--coral-d),0 0 0 0 rgba(255,90,95,.5)}70%{box-shadow:0 4px 0 var(--coral-d),0 0 0 16px rgba(255,90,95,0)}100%{box-shadow:0 4px 0 var(--coral-d),0 0 0 0 rgba(255,90,95,0)}}
+.chat-in{flex:1;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:13px;font-size:15px;font-family:'Nunito';font-weight:700;color:var(--ink)}
+.chat-send{background:var(--emerald);border:none;color:#fff;height:50px;padding:0 16px;border-radius:14px;font-family:'Baloo 2';font-weight:800;box-shadow:0 4px 0 var(--emerald-d)}
+
+.f-hero{padding:18px 18px 4px}.f-hero h1{font-size:28px}.f-hero p{color:var(--sub);font-size:15px;margin-top:2px}
+.busca{width:calc(100% - 32px);margin:14px 16px 6px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:13px 15px;font-size:16px;font-family:'Nunito';font-weight:700;color:var(--ink);box-shadow:0 3px 0 var(--line)}
+.cats{display:flex;gap:8px;overflow-x:auto;padding:8px 16px 12px;-webkit-overflow-scrolling:touch}
+.cat{flex-shrink:0;background:#fff;border:2px solid var(--line);color:var(--sub);border-radius:999px;padding:9px 15px;font-family:'Baloo 2';font-weight:800;font-size:14px;box-shadow:0 3px 0 var(--line)}
+.cat.on{background:var(--emerald);color:#fff;border-color:var(--emerald);box-shadow:0 3px 0 var(--emerald-d)}
+.f-row{background:#fff;border:1px solid var(--line);border-radius:16px;margin:0 16px 9px;padding:13px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 0 var(--line)}
+.f-row .t{flex:1}.f-row .es{font-size:16px;font-weight:800;color:var(--ink)}.f-row .pt{font-size:13.5px;color:var(--sub);margin-top:2px}
+.f-row .sp{background:var(--sky);border:none;color:#fff;width:42px;height:42px;border-radius:12px;font-size:18px;flex-shrink:0;box-shadow:0 3px 0 var(--sky-d)}
+.f-row .sp:active{transform:translateY(2px);box-shadow:0 1px 0 var(--sky-d)}
+.f-sec{margin:16px 18px 8px;font-family:'Baloo 2';font-size:19px}
+
+.p-hero{padding:24px 18px 8px;text-align:center}
+.p-hero .avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#FFD84D,#FFC400);margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:46px;border:5px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.p-hero h1{font-size:26px;margin-top:12px}.p-hero .lvl{color:var(--sub);font-size:14px}
+.p-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px}
+.p-stat{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:0 3px 0 var(--line)}
+.p-stat .v{font-family:'Baloo 2';font-size:24px}
+.p-stat.streak .v{color:var(--coral)}.p-stat.gems .v{color:var(--sky)}.p-stat.med .v{color:var(--gold-d)}
+.p-stat span{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;font-weight:800}
+.xpwrap{margin:6px 16px 0;background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 3px 0 var(--line)}
+.xpwrap .l{display:flex;justify-content:space-between;font-family:'Baloo 2';font-size:15px}
+.xpbar{background:#EDE7DB;border-radius:999px;height:14px;overflow:hidden;margin:8px 0 4px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-d));border-radius:999px;transition:width .4s}
+.xpwrap small{color:var(--sub);font-size:12px;font-weight:700}
+.medgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 16px}
+.med{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center;box-shadow:0 3px 0 var(--line)}
+.med .i{font-size:30px}.med p{font-size:11.5px;font-weight:800;margin-top:5px}.med span{font-size:10px;color:var(--sub);font-weight:700}
+.med.off{opacity:.4;filter:grayscale(1)}
+.cfg{background:#fff;border:2px solid var(--line);border-radius:16px;margin:16px;padding:16px;box-shadow:0 3px 0 var(--line)}
+.cfg label{font-size:12.5px;color:var(--sub);font-weight:800;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.cfg input{width:100%;background:var(--bg);border:2px solid var(--line);color:var(--ink);border-radius:12px;padding:12px;font-size:14px;font-family:'Nunito';font-weight:700;margin-bottom:10px}
+
+#toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-90px);background:var(--ink);color:#fff;font-family:'Baloo 2';font-weight:800;font-size:14.5px;padding:12px 22px;border-radius:999px;z-index:99;transition:transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.25);white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div class="combo" id="combo"></div>
+
+<section class="screen active" id="scr-path">
+  <div class="hud wrap">
+    <span class="flag">🇨🇴</span>
+    <span class="metric streak"><span class="ico">🔥</span><b id="h-streak">0</b></span>
+    <span class="metric gems"><span class="ico">💎</span><b id="h-xp">0</b></span>
+    <span class="metric heart"><span class="ico">❤️</span><b>5</b></span>
+  </div>
+  <div class="wrap" id="path-content"></div>
+</section>
+
+<section class="screen" id="scr-hub">
+  <div class="wrap">
+    <div class="hub-hero">
+      <button class="back" onclick="ir('scr-path')">←</button>
+      <h1 id="hub-title">Día 1 · Llegada a Bogotá</h1>
+      <p id="hub-sub">Aeropuerto El Dorado, hotel y el primer tinto ☕</p>
+    </div>
+    <div class="hub-sec">Lección</div>
+    <div class="card lesson" onclick="abrirLesson()">
+      <div class="emoji">📚</div>
+      <div class="txt"><h3>Vocabulario + quiz</h3><span>Frases, colombianismos y falsos amigos</span></div>
+      <span class="go" id="hub-lesson-flag">›</span>
+    </div>
+    <div class="hub-sec">Conversaciones · habla de verdad 🎙️</div>
+    <div class="card rp1" onclick="abrirChat('uber')">
+      <div class="emoji">🚗</div><div class="txt"><h3>Andrés · tu Uber</h3><span>Te recoge en El Dorado</span></div><span class="go">›</span>
+    </div>
+    <div class="card rp2" onclick="abrirChat('hotel')">
+      <div class="emoji">🛎️</div><div class="txt"><h3>Catalina · recepción</h3><span>Check-in en La Candelaria</span></div><span class="go">›</span>
+    </div>
+    <div class="card rp3" onclick="abrirChat('cafe')">
+      <div class="emoji">☕</div><div class="txt"><h3>Juan · el café</h3><span>Pide tu primer tinto</span></div><span class="go">›</span>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="scr-frases">
+  <div class="wrap">
+    <div class="hud">
+      <span class="flag">🧳</span>
+      <span class="metric" style="color:var(--emerald)"><span class="ico">📴</span><b style="font-size:14px">Offline</b></span>
+    </div>
+    <div class="f-hero"><h1>Frases rápidas</h1><p>Busca a situação e toca 🔊 — o celular fala por você.</p></div>
+    <input class="busca" id="busca" placeholder="Buscar… ex.: conta, cerveja, banheiro">
+    <div class="cats" id="cats"></div>
+    <div id="lista-viaje"></div>
+  </div>
+</section>
+
+<section class="screen" id="scr-perfil">
+  <div class="wrap">
+    <div class="p-hero">
+      <div class="avatar">🐻</div>
+      <h1 id="pf-name">Viajero</h1>
+      <div class="lvl">Nivel <b id="pf-lvl">1</b> · con Rumbo, tu oso guía</div>
+    </div>
+    <div class="p-stats">
+      <div class="p-stat streak"><div class="v" id="pf-streak">0</div><span>🔥 Racha</span></div>
+      <div class="p-stat gems"><div class="v" id="pf-gems">0</div><span>💎 Gemas</span></div>
+      <div class="p-stat med"><div class="v" id="pf-med">0</div><span>🏅 Medallas</span></div>
+    </div>
+    <div class="xpwrap">
+      <div class="l"><span>Progreso</span><span id="pf-xptxt">0 XP</span></div>
+      <div class="xpbar"><i id="pf-bar" style="width:0%"></i></div>
+      <small id="pf-prox"></small>
+    </div>
+    <div class="f-sec">Medallas</div>
+    <div class="medgrid" id="medgrid"></div>
+    <div class="cfg">
+      <label>Voz colombiana premium (Cloud Function · opcional)</label>
+      <input id="cfg-fn" placeholder="https://southamerica-east1-….cloudfunctions.net/parcero" autocomplete="off">
+      <button class="btn3d ghost" onclick="salvarCfg()" style="margin-bottom:10px">Salvar URL</button>
+      <button class="btn3d sky" onclick="testarVoz()">🔊 Testar voz em español</button>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" id="ov-lesson">
+  <div class="les-top">
+    <button class="x" onclick="fecharLesson()">✕</button>
+    <div class="progtrack"><i id="prog" style="width:0%"></i></div>
+    <span class="hp">❤️ <b id="hp">5</b></span>
+  </div>
+  <div class="les-body" id="les-body"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="les-foot"><button class="btn3d" id="les-btn" onclick="lesAction()">Continuar</button></div>
+</div>
+
+<div class="overlay" id="ov-chat">
+  <div class="chat-top">
+    <button class="x" onclick="fecharChat()">✕</button>
+    <div class="av" id="chat-av">🚗</div>
+    <div class="who"><h3 id="chat-name">Andrés</h3><span id="chat-role">tu conductor de Uber · en línea</span></div>
+  </div>
+  <div class="chat-scroll" id="chat-scroll"></div>
+  <div class="chat-foot">
+    <button class="mic" id="mic">🎙️</button>
+    <input class="chat-in" id="chat-in" placeholder="…o escribe en español" autocomplete="off">
+    <button class="chat-send" id="chat-send">➤</button>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button class="tab on" data-scr="scr-path"><span class="ico">🎓</span>Aprender</button>
+  <button class="tab" data-scr="scr-frases"><span class="ico">🧳</span>Frases</button>
+  <button class="tab" data-scr="scr-perfil"><span class="ico">🏅</span>Perfil</button>
+</nav>
+
+<script>
+const S={xp:0,streak:0,ultDia:null,oidas:{},lessonFeita:false,turnos:{},medalhas:{},fnUrl:''};
+function salvar(){try{localStorage.setItem('parcero_v2',JSON.stringify(S));}catch(e){}}
+(function(){try{const d=JSON.parse(localStorage.getItem('parcero_v2'));if(d)Object.assign(S,d);}catch(e){}})();
+(function(){const h=new Date().toDateString();if(S.ultDia!==h){const o=new Date(Date.now()-864e5).toDateString();S.streak=(S.ultDia===o)?S.streak+1:1;S.ultDia=h;salvar();}})();
+
+const MEDALHAS=[
+  {id:'tinto',ico:'☕',nome:'Primer Tinto',desc:'1ª frase ouvida'},
+  {id:'lesson',ico:'🎓',nome:'Día 1',desc:'Lição completa'},
+  {id:'uber',ico:'🚗',nome:'De una',desc:'Falou com o Uber'},
+  {id:'hotel',ico:'🛎️',nome:'Check-in',desc:'Falou na recepção'},
+  {id:'cafe',ico:'☕',nome:'Barista',desc:'Pediu no café'},
+  {id:'nivel3',ico:'⭐',nome:'Nivel 3',desc:'Chegou ao nível 3'}
+];
+function nivel(){return Math.floor(S.xp/100)+1;}
+function ganharXP(n,m){S.xp+=n;salvar();refreshStats();toast('+'+n+' 💎 '+(m||''));if(nivel()>=3)darMedalha('nivel3');}
+function darMedalha(id){if(S.medalhas[id])return;S.medalhas[id]=true;salvar();const m=MEDALHAS.find(x=>x.id===id);setTimeout(()=>toast('🏅 '+m.nome),800);refreshStats();renderMed();}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2100);}
+function refreshStats(){const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('h-streak',S.streak);set('h-xp',S.xp);set('pf-streak',S.streak);set('pf-gems',S.xp);set('pf-med',Object.keys(S.medalhas).length);
+  set('pf-lvl',nivel());set('pf-xptxt',S.xp+' XP');const bar=document.getElementById('pf-bar');if(bar)bar.style.width=(S.xp%100)+'%';
+  set('pf-prox',(100-(S.xp%100))+' XP para o nível '+(nivel()+1));}
+
+function ir(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);if(id==='scr-path')requestAnimationFrame(drawTrail);}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');ir(b.dataset.scr);}));
+
+let vozES=null,ttsOn=false;
+function acharVoz(){const v=speechSynthesis.getVoices();vozES=v.find(x=>/es[-_]CO/i.test(x.lang))||v.find(x=>/es[-_](MX|US|419)/i.test(x.lang))||v.find(x=>/^es/i.test(x.lang))||null;}
+if('speechSynthesis'in window){acharVoz();speechSynthesis.onvoiceschanged=acharVoz;}
+function destravar(){if(ttsOn||!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);ttsOn=true;}
+document.addEventListener('touchend',destravar,{once:true});document.addEventListener('click',destravar,{once:true});
+function falar(t){if(!('speechSynthesis'in window)){toast('TTS indisponível');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=vozES?vozES.lang:'es-419';if(vozES)u.voice=vozES;u.rate=.9;speechSynthesis.speak(u);}
+function testarVoz(){falar('¡Qué más, parcero! Bienvenido a Colombia.');}
+
+const UNITS=[
+  {cls:'u1',lbl:'Unidad 1',nome:'Bogotá',sub:'Llegada, calle y restaurante',guia:'⛰️',dias:[
+    {n:1,ico:'✈️',t:'Llegada a Bogotá',sub:'Uber, hotel y café',on:true},
+    {n:2,ico:'🚶',t:'La calle bogotana',sub:'Direções e transporte'},
+    {n:3,ico:'🍲',t:'Restaurante y tinto',sub:'Pedir, conta, ajiaco'}]},
+  {cls:'u2',lbl:'Unidad 2',nome:'Medellín',sub:'Metro, paisas y rumba',guia:'🌄',dias:[
+    {n:4,ico:'🚋',t:'¡Hola, Medellín!',sub:'Metrô, ¡parcero!'},
+    {n:5,ico:'🍺',t:'Bar paisa',sub:'Cerveja, guaro, papo'},
+    {n:6,ico:'💃',t:'¡A rumbear!',sub:'Balada, dançar'}]},
+  {cls:'u3',lbl:'Unidad 3',nome:'Cartagena',sub:'Costeños, praia y museos',guia:'🏖️',dias:[
+    {n:7,ico:'🌊',t:'Cartagena caliente',sub:'Praia, negociar'},
+    {n:8,ico:'🏛️',t:'Museos y adiós',sub:'Passeios, imprevistos'}]}
+];
+function renderPath(){let i=0,html='';
+  UNITS.forEach(u=>{
+    html+=`<div class="unit ${u.cls}"><div class="lbl">${u.lbl} · ${u.nome}</div><h2>${u.nome}</h2><p>${u.sub}</p><div class="guia">${u.guia}</div></div><div class="path">`;
+    u.dias.forEach(d=>{const off=Math.round(64*Math.sin(i*0.9));i++;
+      const done=(d.n===1&&S.lessonFeita),cur=(d.n===1&&!S.lessonFeita),locked=!d.on;
+      const cls=done?'done':cur?'current':locked?'locked':'';
+      html+=`<div class="node-row"><button class="node ${cls}" style="transform:translateX(${off}px)" ${d.on?`onclick="abrirHub(${d.n})"`:''}><div class="ring"></div><div class="body">${d.ico}</div>${done?'<span class="chk">✅</span>':''}${cur?'<span class="startbubble">¡Empieza!</span>':''}</button>`;
+      if(cur)html+=`<div class="mascot"><div class="bear"><div class="ear l"></div><div class="ear r"></div><div class="glass l"></div><div class="glass r"></div><div class="eye l"></div><div class="eye r"></div><div class="snout"></div><div class="nose"></div></div></div>`;
+      html+=`</div>`;});
+    html+=`</div>`;});
+  html+=`<div class="path"><div class="node-row"><button class="node locked" style="transform:translateX(0)"><div class="ring"></div><div class="body">🏆</div></button></div></div>`;
+  document.getElementById('path-content').innerHTML=html;
+  requestAnimationFrame(()=>requestAnimationFrame(drawTrail));}
+function drawTrail(){const cont=document.getElementById('path-content');if(!cont)return;
+  document.querySelectorAll('.path').forEach(p=>{
+    let svg=p.querySelector('.trail-svg');
+    if(!svg){svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','trail-svg');svg.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0';p.prepend(svg);}
+    const nodes=[...p.querySelectorAll('.node')];if(nodes.length<2){svg.innerHTML='';return;}
+    const pr=p.getBoundingClientRect();svg.setAttribute('width',pr.width);svg.setAttribute('height',pr.height);
+    let d='';const pts=nodes.map(n=>{const r=n.getBoundingClientRect();return{x:r.left-pr.left+r.width/2,y:r.top-pr.top+r.height/2};});
+    for(let k=0;k<pts.length-1;k++){const a=pts[k],b=pts[k+1],mx=(a.x+b.x)/2;d+=`M${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y} `;}
+    svg.innerHTML=`<path d="${d}" fill="none" stroke="#E4DECF" stroke-width="7" stroke-linecap="round" stroke-dasharray="2 16"/>`;});}
+window.addEventListener('resize',()=>requestAnimationFrame(drawTrail));
+
+function abrirHub(n){ir('scr-hub');document.getElementById('hub-lesson-flag').textContent=S.lessonFeita?'✅':'›';}
+
+const VOCAB=[
+  {emoji:'👋',es:'Buenas, ¿cómo está?',pt:'Olá, como vai?'},
+  {emoji:'🛂',es:'Vengo de Brasil, estoy de turismo.',pt:'Venho do Brasil, estou de turismo.'},
+  {emoji:'📇',es:'Mi apellido es Silva.',pt:'Meu SOBRENOME é Silva.'},
+  {emoji:'📍',es:'¿Me lleva a esta dirección, por favor?',pt:'Me leva a este endereço, por favor?'},
+  {emoji:'💳',es:'¿Acepta tarjeta o solo efectivo?',pt:'Aceita cartão ou só dinheiro?'},
+  {emoji:'📶',es:'¿Me regala la clave del wifi?',pt:'Me passa a senha do wifi?'},
+  {emoji:'☕',es:'Un tinto, por favor.',pt:'Um cafezinho, por favor.'},
+  {emoji:'🐢',es:'Más despacio, por favor.',pt:'Mais devagar, por favor.'}
+];
+const TIPS=[
+  {kind:'colomb',t:'¿Qué más?',d:'É o "e aí? / tudo bem?" universal colombiano. Responde com "¡Bien, bien!" e devolve a pergunta.'},
+  {kind:'colomb',t:'Me regala…',d:'Colombianíssimo para pedir algo com educação. "¿Me regala un café?" NÃO é de graça — é só o jeito gentil de pedir.'},
+  {kind:'falso',esp:'apellido',good:'sobrenome',bad:'apelido',d:'Na imigração vão pedir seu "apellido" = sobrenome. Apelido em espanhol é "apodo".'},
+  {kind:'falso',esp:'exquisito',good:'delicioso',bad:'esquisito',d:'Se disserem que a comida está "exquisita", é elogio! Esquisito (estranho) é "raro".'}
+];
+const QUIZ=[
+  {q:'O motorista fala rápido demais. Você diz:',ops:['Más despacio, por favor','Más rápido, por favor','Habla exquisito'],ok:0},
+  {q:'"¿Me regala la clave del wifi?" significa:',ops:['Ele te dá o wifi de graça','Jeito educado de pedir a senha','Você paga pela senha'],ok:1},
+  {q:'Pedem seu "apellido" na imigração. É:',ops:['Seu apelido','Seu sobrenome','Sua profissão'],ok:1},
+  {q:'Pedir un "tinto" em Bogotá é pedir:',ops:['Vinho tinto','Cafezinho preto','Suco de uva'],ok:1},
+  {q:'"¿Acepta tarjeta o solo efectivo?" pergunta se aceita:',ops:['Cartão ou só dinheiro','Só dólar','Cheque'],ok:0}
+];
+
+let STEPS=[],si=0,combo=0,hp=5,answered=false,selIdx=null;
+function montarSteps(){STEPS=[];STEPS.push({type:'intro'});
+  VOCAB.forEach(v=>STEPS.push({type:'vocab',v}));
+  STEPS.push({type:'tip',tip:TIPS[0]});STEPS.push({type:'tip',tip:TIPS[1]});
+  STEPS.push({type:'quiz',q:QUIZ[0]});STEPS.push({type:'quiz',q:QUIZ[1]});
+  STEPS.push({type:'tip',tip:TIPS[2]});STEPS.push({type:'tip',tip:TIPS[3]});
+  STEPS.push({type:'quiz',q:QUIZ[2]});STEPS.push({type:'quiz',q:QUIZ[3]});STEPS.push({type:'quiz',q:QUIZ[4]});
+  STEPS.push({type:'done'});}
+function abrirLesson(){montarSteps();si=0;combo=0;hp=5;document.getElementById('hp').textContent=hp;document.getElementById('ov-lesson').classList.add('active');renderStep();}
+function fecharLesson(){document.getElementById('ov-lesson').classList.remove('active');}
+function setProg(){document.getElementById('prog').style.width=Math.round(si/(STEPS.length-1)*100)+'%';}
+function hideFB(){document.getElementById('feedback').className='feedback';}
+function renderStep(){setProg();hideFB();answered=false;selIdx=null;
+  const body=document.getElementById('les-body'),btn=document.getElementById('les-btn'),st=STEPS[si];
+  btn.className='btn3d';btn.textContent='Continuar';btn.disabled=false;
+  if(st.type==='intro'){body.innerHTML=`<div class="vocab-big"><div class="emoji">🇨🇴</div><div class="es" style="font-size:28px">Día 1 · Llegada a Bogotá</div><div class="pt">Vamos aprender o essencial pra sair do aeroporto, fazer check-in e pedir seu primeiro tinto. ¡Vamos, parcero!</div></div>`;btn.textContent='¡Empezar!';}
+  else if(st.type==='vocab'){body.innerHTML=`<div class="les-kicker">Nueva frase</div><div class="vocab-big"><div class="emoji">${st.v.emoji}</div><div class="es">${st.v.es}</div><div class="pt">${st.v.pt}</div><button class="speak" onclick="falar('${st.v.es.replace(/'/g,"\\'")}')">🔊</button></div>`;setTimeout(()=>falar(st.v.es),350);}
+  else if(st.type==='tip'){const t=st.tip;
+    if(t.kind==='colomb'){body.innerHTML=`<div class="tipbox colomb"><span class="tag">Colombianismo</span><h3>${t.t}</h3><p>${t.d}</p><button class="speak" style="margin-top:14px;width:60px;height:60px;font-size:24px;background:var(--emerald);box-shadow:0 5px 0 var(--emerald-d)" onclick="falar('${t.t.replace(/'/g,"\\'")}')">🔊</button></div>`;}
+    else{body.innerHTML=`<div class="tipbox falso"><span class="tag">⚠️ Falso amigo</span><h3><em>${t.esp}</em> = <b>${t.good}</b></h3><p>Não é "${t.bad}" do português. ${t.d}</p></div>`;}}
+  else if(st.type==='quiz'){body.innerHTML=`<div class="les-kicker">Elige la respuesta</div><div class="q-head">${st.q.q}</div><div id="opts">${st.q.ops.map((o,k)=>`<button class="q-opt" onclick="selOpt(${k})"><span class="kbd">${k+1}</span>${o}</button>`).join('')}</div>`;btn.textContent='Comprobar';btn.disabled=true;}
+  else if(st.type==='done'){if(!S.lessonFeita){S.lessonFeita=true;salvar();ganharXP(30,'Día 1');darMedalha('lesson');}
+    body.innerHTML=`<div class="done-screen"><div class="big">🎉</div><h1>¡Muy bacano!</h1><p>Terminou a lição do Día 1. Agora bora falar de verdade 👇</p><div class="reward"><div class="r xp"><div class="v">+30</div><span>💎 XP</span></div><div class="r combo2"><div class="v">${combo}🔥</div><span>Combo</span></div></div></div>`;btn.textContent='Ir a las conversaciones';}}
+function selOpt(k){if(answered)return;selIdx=k;document.querySelectorAll('.q-opt').forEach((b,i)=>b.classList.toggle('sel',i===k));document.getElementById('les-btn').disabled=false;}
+function lesAction(){const st=STEPS[si];
+  if(st.type==='quiz'&&!answered){if(selIdx===null)return;answered=true;const ok=selIdx===st.q.ok;
+    document.querySelectorAll('.q-opt').forEach(b=>b.style.pointerEvents='none');
+    document.querySelectorAll('.q-opt')[st.q.ok].classList.add('right');
+    if(!ok)document.querySelectorAll('.q-opt')[selIdx].classList.add('wrong');
+    const fb=document.getElementById('feedback');
+    if(ok){combo++;ganharXP(10,'acerto');if(combo>=3)popCombo();fb.className='feedback ok show';fb.innerHTML=`<h4>✅ ¡Correcto!</h4><p>${combo>1?'Combo x'+combo+' 🔥':'Sigue así, parcero.'}</p>`;const btn=document.getElementById('les-btn');btn.className='btn3d';btn.textContent='Continuar';}
+    else{combo=0;hp=Math.max(0,hp-1);document.getElementById('hp').textContent=hp;fb.className='feedback bad show';fb.innerHTML=`<h4>❌ Casi…</h4><p>A certa é: <b>${st.q.ops[st.q.ok]}</b></p>`;const btn=document.getElementById('les-btn');btn.className='btn3d coral';btn.textContent='Continuar';}
+    return;}
+  if(st.type==='done'){fecharLesson();ir('scr-hub');document.getElementById('hub-lesson-flag').textContent='✅';renderPath();return;}
+  si++;if(si>=STEPS.length)si=STEPS.length-1;renderStep();}
+function popCombo(){const c=document.getElementById('combo');c.textContent='¡Combo x'+combo+'!';c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');}
+
+const CHARS={
+  uber:{av:'🚗',name:'Andrés',role:'tu conductor de Uber · en línea',
+    sys:`Eres Andrés, conductor de Uber en Bogotá, 42 años, amable y conversador. Acabas de recoger a un turista brasileño en el aeropuerto El Dorado. Confirma su nombre y el destino, comenta el tráfico y el frío bogotano, y recomienda algo. Español colombiano coloquial (sumercé, ¿qué más?, listo, de una, a la orden). Frases CORTAS, máximo 2. Sé paciente si mezcla portugués. Después de ~5 intercambios, llega al destino y despídete.`,
+    open:'¡Buenas, sumercé! Bienvenido a Bogotá. ¿Usted es el señor Fernando, cierto? ¿Para dónde vamos?',
+    dica:'Ele confirmou seu nome e perguntou o destino. Responde: "Sí, soy yo. A La Candelaria, por favor."'},
+  hotel:{av:'🛎️',name:'Catalina',role:'recepción del hotel · en línea',
+    sys:`Eres Catalina, recepcionista de un hotel boutique en La Candelaria, Bogotá. Un huésped brasileño llega a hacer check-in. Pide su nombre y la reserva, luego el documento, y explica el wifi y el horario del desayuno. Tono cálido y formal colombiano (con mucho gusto, a la orden, claro que sí, sumercé). Frases CORTAS, máximo 2. Después de ~5 intercambios, entrega la llave y desea buena estadía.`,
+    open:'¡Buenas tardes! Bienvenido a nuestro hotel. ¿A nombre de quién está la reserva?',
+    dica:'Ela quer o nome da reserva. Responde: "A nombre de Fernando Silva."'},
+  cafe:{av:'☕',name:'Juan',role:'barista del café · en línea',
+    sys:`Eres Juan, barista jovial de un café en Bogotá. Un cliente brasileño quiere pedir. Salúdalo, recomienda un tinto o un café con leche, pregunta si es para tomar aquí o para llevar, y di el precio en pesos colombianos. Español colombiano cálido (¿qué más?, de una, listo, ya mismo, con gusto). Frases CORTAS, máximo 2. Después de ~5 intercambios, entrega el pedido.`,
+    open:'¡Qué más, parcero! Bienvenido. ¿Qué le provoca hoy? Tenemos un tinto muy bueno.',
+    dica:'Ele perguntou o que você quer. Responde: "Un tinto, por favor." ("provocar" aqui = ter vontade de)'}
+};
+let curChar='uber',hist=[];
+function abrirChat(key){curChar=key;hist=[];const c=CHARS[key];
+  document.getElementById('chat-av').textContent=c.av;document.getElementById('chat-name').textContent=c.name;document.getElementById('chat-role').textContent=c.role;
+  document.getElementById('chat-scroll').innerHTML='';document.getElementById('ov-chat').classList.add('active');
+  addMsg('them',c.open+`<span class="dica">💡 ${c.dica}</span>`);
+  hist.push({role:'assistant',content:JSON.stringify({es:c.open,dica:c.dica,sugerencia:''})});}
+function fecharChat(){document.getElementById('ov-chat').classList.remove('active');}
+function addMsg(cls,html){const s=document.getElementById('chat-scroll');const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;s.appendChild(d);s.scrollTop=s.scrollHeight;return d;}
+async function llamar(text){hist.push({role:'user',content:text});
+  const sys=CHARS[curChar].sys+`\nRESPONDE SOLO un JSON válido, sin markdown: {"es":"respuesta hablada corta","dica":"dica curta em português BR sobre a fala do usuário ou como responder melhor","sugerencia":"frase pronta em espanhol para o usuário usar agora, ou string vazia"}`;
+  let raw='';
+  if(S.fnUrl){const r=await fetch(S.fnUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:hist,max_tokens:1000})});const d=await r.json();raw=d.text||d.content||'';}
+  else{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:hist})});const d=await r.json();raw=(d.content||[]).map(c=>c.type==='text'?c.text:'').join('');}
+  hist.push({role:'assistant',content:raw});if(hist.length>16)hist=hist.slice(-16);
+  try{return JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){return{es:raw,dica:'',sugerencia:''};}}
+async function enviar(text){text=(text||'').trim();if(!text)return;
+  addMsg('me',text);document.getElementById('chat-in').value='';
+  const wait=addMsg('them','<span style="opacity:.5">escribiendo…</span>');
+  try{const r=await llamar(text);
+    wait.innerHTML=`${r.es} <span class="replay" onclick="falar('${(r.es||'').replace(/'/g,"\\'")}')">🔊</span>`+(r.dica?`<span class="dica">💡 ${r.dica}</span>`:'')+(r.sugerencia?`<span class="sug">🗣️ Tenta: "${r.sugerencia}"</span>`:'');
+    falar(r.es);S.turnos[curChar]=(S.turnos[curChar]||0)+1;salvar();ganharXP(15,'conversación');darMedalha(curChar);}
+  catch(e){wait.innerHTML='⚠️ Não consegui responder. '+(S.fnUrl?'Confere a URL da Cloud Function no Perfil.':'No GitHub Pages, configure a Cloud Function no Perfil.');}}
+document.getElementById('chat-send').addEventListener('click',()=>enviar(document.getElementById('chat-in').value));
+document.getElementById('chat-in').addEventListener('keydown',e=>{if(e.key==='Enter')enviar(e.target.value);});
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const mic=document.getElementById('mic');let rec=null,rec_on=false;
+if(SR){rec=new SR();rec.lang='es-CO';rec.interimResults=false;rec.maxAlternatives=1;
+  rec.onresult=e=>enviar(e.results[0][0].transcript);
+  rec.onend=()=>{rec_on=false;mic.classList.remove('rec');};
+  rec.onerror=ev=>{rec_on=false;mic.classList.remove('rec');if(ev.error!=='aborted')toast('Mic falhou — usa o texto 👇');};
+  mic.addEventListener('click',()=>{if(rec_on){rec.stop();return;}try{speechSynthesis.cancel();rec.start();rec_on=true;mic.classList.add('rec');}catch(e){toast('Mic ocupado, tenta de novo');}});}
+else{mic.style.opacity=.4;mic.addEventListener('click',()=>toast('Sem voz aqui — usa o texto'));}
+
+const VIAJE=[
+  {cat:'🚗 Uber/Taxi',fr:[['¿Me lleva a esta dirección?','Me leva a este endereço?'],['¿Cuánto me cobra hasta el centro?','Quanto cobra até o centro?'],['Aquí está bien, gracias.','Aqui está bom, obrigado.'],['¿Me espera cinco minutos?','Me espera cinco minutos?']]},
+  {cat:'🛎️ Hotel',fr:[['Tengo una reserva a nombre de…','Tenho uma reserva no nome de…'],['¿A qué hora es el desayuno?','A que horas é o café da manhã?'],['¿Me regala la clave del wifi?','Me passa a senha do wifi?'],['¿Me guarda la maleta, por favor?','Guarda minha mala, por favor?']]},
+  {cat:'☕ Café',fr:[['Un tinto, por favor.','Um cafezinho, por favor.'],['¿Me regala un café con leche?','Me vê um café com leite?'],['¿Para llevar, puede ser?','Pra viagem, pode ser?'],['¿Tiene algo sin azúcar?','Tem algo sem açúcar?']]},
+  {cat:'🍽️ Restaurante',fr:[['Una mesa para dos, por favor.','Uma mesa para dois, por favor.'],['¿Qué me recomienda de la casa?','O que recomenda da casa?'],['¿Este plato pica mucho?','Este prato é muito apimentado?'],['La cuenta, por favor.','A conta, por favor.'],['Estaba exquisito, ¡gracias!','Estava delicioso, obrigado!']]},
+  {cat:'🍺 Bar',fr:[['Dos cervezas bien frías, porfa.','Duas cervejas bem geladas, por favor.'],['Un aguardiente, para probar.','Uma aguardente, pra provar.'],['¡Salud, parceros!','Saúde, amigos!'],['Otra ronda, por favor.','Mais uma rodada, por favor.']]},
+  {cat:'💃 Rumba',fr:[['¿Quieres bailar?','Quer dançar?'],['No sé bailar salsa, ¿me enseñas?','Não sei dançar salsa, me ensina?'],['¡Qué buena música!','Que música boa!'],['Gracias, ahora estoy descansando.','Obrigado, agora estou descansando.']]},
+  {cat:'🏛️ Museu',fr:[['¿Cuánto cuesta la entrada?','Quanto custa a entrada?'],['¿Hasta qué hora está abierto?','Até que horas está aberto?'],['¿Se pueden tomar fotos?','Pode tirar fotos?'],['¿Hay descuento para estudiantes?','Tem desconto para estudantes?']]},
+  {cat:'🛍️ Compras',fr:[['¿Cuánto vale esto?','Quanto custa isto?'],['¿Me hace un descuentico?','Me faz um descontinho?'],['Solo estoy mirando, gracias.','Só estou olhando, obrigado.'],['No gracias, ya tengo.','Não obrigado, já tenho.']]},
+  {cat:'🆘 Emergência',fr:[['¿Dónde está el baño?','Onde fica o banheiro?'],['Necesito una farmacia.','Preciso de uma farmácia.'],['Perdí mi celular.','Perdi meu celular.'],['¿Me ayuda? Estoy perdido.','Pode me ajudar? Estou perdido.'],['Soy alérgico a…','Sou alérgico a…']]}
+];
+let catAtiva='todas';
+function renderCats(){const cats=['todas',...VIAJE.map(v=>v.cat)];document.getElementById('cats').innerHTML=cats.map(c=>`<button class="cat ${catAtiva===c?'on':''}" onclick="catAtiva='${c}';renderCats();renderViaje()">${c==='todas'?'✨ Todas':c}</button>`).join('');}
+function renderViaje(){const t=(document.getElementById('busca').value||'').toLowerCase();let html='';
+  VIAJE.forEach(s=>{if(catAtiva!=='todas'&&catAtiva!==s.cat)return;const fr=s.fr.filter(f=>!t||f[0].toLowerCase().includes(t)||f[1].toLowerCase().includes(t));if(!fr.length)return;
+    html+=`<div class="f-sec">${s.cat}</div>`;html+=fr.map(f=>`<div class="f-row"><div class="t"><div class="es">${f[0]}</div><div class="pt">${f[1]}</div></div><button class="sp" onclick="falar('${f[0].replace(/'/g,"\\'")}')">🔊</button></div>`).join('');});
+  document.getElementById('lista-viaje').innerHTML=html||'<p style="text-align:center;color:var(--sub);padding:20px">Nada encontrado — tenta outra palavra.</p>';}
+document.getElementById('busca').addEventListener('input',renderViaje);
+
+function renderMed(){const g=document.getElementById('medgrid');if(g)g.innerHTML=MEDALHAS.map(m=>`<div class="med ${S.medalhas[m.id]?'':'off'}"><div class="i">${m.ico}</div><p>${m.nome}</p><span>${m.desc}</span></div>`).join('');}
+function salvarCfg(){S.fnUrl=document.getElementById('cfg-fn').value.trim();salvar();toast(S.fnUrl?'Cloud Function salva ✅':'Usando API direta (preview)');}
+document.getElementById('cfg-fn').value=S.fnUrl||'';
+
+renderPath();renderCats();renderViaje();renderMed();refreshStats();
+window.addEventListener('load',()=>setTimeout(drawTrail,120));
+</script>
+</body>
+</html>
