@@ -280,7 +280,8 @@ button{font-family:inherit}
         <input id="cfg-med" placeholder="URL da foto de Medellín" autocomplete="off">
         <input id="cfg-car" placeholder="URL da foto de Cartagena" autocomplete="off">
         <button onclick="salvarFotos()">Aplicar fotos</button>
-        <p class="note">O app já procura os arquivos <b>bogota.jpg</b>, <b>medellin.jpg</b> e <b>cartagena.jpg</b> na mesma pasta deste HTML. Se não achar, usa as cenas vetoriais (offline). Os campos acima só servem pra sobrescrever com uma URL externa.</p>
+        <p class="note">O app já procura os arquivos <b>bogota_1/2/3.jpg</b>, <b>medelin_1/2/3.jpg</b> e <b>cartagena_1/2/3.jpg</b> na mesma pasta deste HTML. Os campos acima só servem pra sobrescrever com uma URL externa.</p>
+        <div id="diag" style="margin-top:12px;font-size:12.5px;font-weight:600;line-height:1.9"></div>
       </div>
       <div class="cfg">
         <label>Voz colombiana premium (opcional)</label>
@@ -308,6 +309,7 @@ button{font-family:inherit}
   <div class="grab"></div>
   <div class="sh"><div class="av" id="sh-av">🚗</div><div><h3 id="sh-nm">Andrés</h3><span id="sh-role">tu Uber · en línea</span></div><button class="x" onclick="fecharSheet()">✕</button></div>
   <div class="sc" id="sc"></div>
+  <div id="mic-status" style="display:none;padding:0 18px 8px;font-size:13px;font-weight:600;line-height:1.4"></div>
   <div class="sf">
     <button class="mic" id="mic">🎙️</button>
     <input class="si" id="si" placeholder="Responde en español…" autocomplete="off">
@@ -348,7 +350,9 @@ function esc(s){return (s||'').replace(/'/g,"\\'");}
    CENAS DAS CIDADES — SVG inline (offline) ou foto real
    Cada cena vira data-URI, então não há dependência externa.
    ===================================================== */
-function svgURI(svg){return "url(\"data:image/svg+xml;utf8,"+encodeURIComponent(svg)+"\")";}
+/* IMPORTANTE: aspas SIMPLES aqui. Este valor é injetado dentro de
+   style="..." — com aspas duplas o atributo quebra e a imagem some. */
+function svgURI(svg){return "url('data:image/svg+xml;utf8,"+encodeURIComponent(svg)+"')";}
 const SCENES={
   bogota:svgURI(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360" viewBox="0 0 600 360">
     <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B7FC7"/><stop offset="1" stop-color="#B9CCEA"/></linearGradient>
@@ -387,27 +391,46 @@ const SCENES={
   </svg>`)
 };
 function keyOf(city){return city==='Medellín'?'medellin':city==='Cartagena'?'cartagena':'bogota';}
-/* prioridade: URL colada no Perfil > arquivo local do repo > cena SVG */
-function urlDe(key){
+const FOTOS_FALHOU={};
+/* prioridade: URL colada no Perfil > fotos do repo (rodízio) > cena SVG */
+function urlDe(key,variante){
   if(S.fotos[key])return S.fotos[key];
-  if(FOTOS_PADRAO[key]&&!FOTOS_FALHOU[key])return FOTOS_PADRAO[key];
-  return null;
+  const ok=(FOTOS_PADRAO[key]||[]).filter(f=>!FOTOS_FALHOU[f]);
+  if(!ok.length)return null;
+  return ok[Math.abs(variante||0)%ok.length];
 }
-function bgFor(city){
-  const key=keyOf(city),u=urlDe(key);
+function bgFor(city,variante){
+  const key=keyOf(city),u=urlDe(key,variante);
   return u?`background-image:url('${u}'),${SCENES[key]}`:`background-image:${SCENES[key]}`;
 }
-function isFoto(city){return !!urlDe(keyOf(city));}
-/* Se um arquivo .jpg não existir no repo, marca como falho e volta pro SVG */
-const FOTOS_FALHOU={};
+function isFoto(city,variante){return !!urlDe(keyOf(city),variante);}
+/* testa cada arquivo; o que não existir é marcado e sai do rodízio */
+const FOTOS_OK={};
 (function testarFotos(){
   Object.keys(FOTOS_PADRAO).forEach(k=>{
-    const img=new Image();
-    img.onerror=()=>{FOTOS_FALHOU[k]=true;redesenhar();};
-    img.src=FOTOS_PADRAO[k];
+    FOTOS_PADRAO[k].forEach(f=>{
+      const img=new Image();
+      img.onload=()=>{FOTOS_OK[f]=true;renderDiag();redesenhar();};
+      img.onerror=()=>{FOTOS_FALHOU[f]=true;renderDiag();redesenhar();};
+      img.src=f;
+    });
   });
 })();
-function redesenhar(){renderStories();renderFeed();renderCities();}
+function renderDiag(){
+  const el=document.getElementById('diag');if(!el)return;
+  let h='';
+  Object.keys(FOTOS_PADRAO).forEach(k=>{
+    FOTOS_PADRAO[k].forEach(f=>{
+      const st=FOTOS_OK[f]?'<b style="color:var(--verde)">✅ encontrada</b>'
+              :FOTOS_FALHOU[f]?'<b style="color:var(--rojo)">❌ não achei</b>'
+              :'⏳ testando…';
+      h+=`<div>${f} — ${st}</div>`;
+    });
+  });
+  el.innerHTML=h;
+}
+let _rd=null;
+function redesenhar(){clearTimeout(_rd);_rd=setTimeout(()=>{renderStories();renderFeed();renderCities();},120);}
 function salvarFotos(){
   S.fotos={bogota:document.getElementById('cfg-bog').value.trim(),
            medellin:document.getElementById('cfg-med').value.trim(),
@@ -475,7 +498,7 @@ const STORIES=[
 function renderStories(){
   document.getElementById('stories').innerHTML=STORIES.map((s,i)=>
     `<button class="st ${S.vistos['st'+s.id]?'seen':''}" onclick="abrirStory(${i})">
-      <div class="ring"><div class="in"><div class="scene" style="${bgFor(s.cid)};background-size:cover;background-position:center"></div></div></div>
+      <div class="ring"><div class="in"><div class="scene" style="${bgFor(s.cid,i)};background-size:cover;background-position:center"></div></div></div>
       <p>${s.nm}</p></button>`).join('');
 }
 let stI=0,stC=0,stT=null;
@@ -488,7 +511,7 @@ function renderStory(){
   document.getElementById('stv-nm').textContent=s.nm;
   document.getElementById('stv-bars').innerHTML=s.cards.map((_,k)=>`<div class="bar ${k<stC?'done':k===stC?'now':''}"><i></i></div>`).join('');
   document.getElementById('stv-stage').innerHTML=
-    `<div class="bgph" style="${bgFor(c.cid)}"></div><div class="bgsc"></div>
+    `<div class="bgph" style="${bgFor(c.cid,stC)}"></div><div class="bgsc"></div>
      <div class="taps"><div onclick="stPrev()"></div><div onclick="stNext()"></div></div>
      <div class="txt"><div class="e">${c.es}</div><div class="p">${c.pt}</div></div>
      <button class="sp" onclick="event.stopPropagation();falar('${esc(c.es)}')">🔊 Escuchar</button>`;
@@ -547,9 +570,9 @@ function renderFeed(){
     else if(p.k==='musica')b=`<span class="kind k-musica">Suena Colombia</span><div class="es">${p.song}</div><div class="pt" style="margin-bottom:10px">${p.art}</div><div class="d">${p.info}</div><div class="words">${p.words.map(w=>`<span>${w}</span>`).join('')}</div><a class="lyr" href="${G+encodeURIComponent(p.q)}" target="_blank" rel="noopener" onclick="ver(${i})">📖 Letra oficial (Genius)</a><div class="mini">As letras não são reproduzidas no app — só o vocabulário. O link abre a letra oficial licenciada.</div>`;
     return `<article class="post" data-i="${i}" ontouchend="tap(event,${i})">
       <div class="cover">
-        <div class="ph" style="${bgFor(p.cid)}"></div><div class="scrim"></div>
+        <div class="ph" style="${bgFor(p.cid,i)}"></div><div class="scrim"></div>
         <div class="who"><div class="av">${avOf(p.who)}</div><div><div class="nm">${nmOf(p.who)}</div><div class="cid">${p.cid}</div></div><span class="badge">${p.cid}</span></div>
-        ${isFoto(p.cid)?'<div class="credit">foto: sua</div>':''}
+        ${isFoto(p.cid,i)?'<div class="credit">'+p.cid+'</div>':''}
       </div>
       <div class="dbl" id="dbl${i}">❤️</div>
       <div class="body">${b}</div>
@@ -617,13 +640,69 @@ document.getElementById('ss').addEventListener('click',()=>enviar(document.getEl
 document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')enviar(e.target.value);});
 
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-const mic=document.getElementById('mic');let rec=null,recOn=false;
-if(SR){rec=new SR();rec.lang='es-CO';rec.interimResults=false;rec.maxAlternatives=1;
-  rec.onresult=e=>enviar(e.results[0][0].transcript);
-  rec.onend=()=>{recOn=false;mic.classList.remove('rec');};
-  rec.onerror=ev=>{recOn=false;mic.classList.remove('rec');if(ev.error!=='aborted')toast('Mic falhou — usa o texto');};
-  mic.addEventListener('click',()=>{if(recOn){rec.stop();return;}try{speechSynthesis.cancel();rec.start();recOn=true;mic.classList.add('rec');}catch(e){toast('Mic ocupado');}});}
-else{mic.style.opacity=.4;mic.addEventListener('click',()=>toast('Sem voz aqui — usa o texto'));}
+const mic=document.getElementById('mic');let rec=null,recOn=false,recTO=null;
+function setStatus(t,cor){const e=document.getElementById('mic-status');if(!e)return;
+  e.textContent=t||'';e.style.color=cor||'var(--ink2)';e.style.display=t?'block':'none';}
+if(SR){
+  rec=new SR();
+  rec.lang='es-CO';
+  rec.continuous=false;
+  rec.interimResults=true;      /* mostra o texto enquanto você fala */
+  rec.maxAlternatives=1;
+
+  rec.onstart=()=>{recOn=true;mic.classList.add('rec');setStatus('🎙️ Escuchando… habla ahora','var(--rojo)');};
+  rec.onaudiostart=()=>setStatus('🎙️ Gravando… pode falar','var(--rojo)');
+  rec.onspeechstart=()=>setStatus('🎙️ Ouvindo você…','var(--rojo)');
+
+  rec.onresult=e=>{
+    let fin='',int='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal)fin+=t;else int+=t;
+    }
+    const txt=(fin||int).trim();
+    if(txt){document.getElementById('si').value=txt;setStatus('“'+txt+'”','var(--verde)');}
+  };
+
+  rec.onend=()=>{
+    recOn=false;mic.classList.remove('rec');clearTimeout(recTO);
+    const v=document.getElementById('si').value.trim();
+    if(v){setStatus('');enviar(v);}
+    else setStatus('Não captei nada. Tenta de novo ou escreve abaixo 👇');
+  };
+
+  rec.onerror=ev=>{
+    recOn=false;mic.classList.remove('rec');clearTimeout(recTO);
+    const m={
+      'not-allowed':'Microfone bloqueado. No iPhone: Ajustes → Safari → Microfone → Perguntar/Permitir.',
+      'service-not-allowed':'O iOS bloqueou o reconhecimento. Ative Ajustes → Geral → Teclado → Ditado.',
+      'no-speech':'Não ouvi nada. Fala mais perto e mais alto.',
+      'audio-capture':'Microfone indisponível. Feche outros apps que estejam usando o mic.',
+      'network':'O reconhecimento de voz do iOS precisa de internet. Confere a conexão.',
+      'aborted':''
+    };
+    const msg=m[ev.error];
+    if(msg===undefined)setStatus('Falha no microfone ('+ev.error+'). Usa o texto abaixo.');
+    else if(msg)setStatus(msg);
+  };
+
+  mic.addEventListener('click',()=>{
+    if(recOn){rec.stop();return;}
+    speechSynthesis.cancel();               /* evita conflito com o TTS */
+    document.getElementById('si').value='';
+    try{
+      rec.start();
+      /* iOS às vezes não dispara onend sozinho — corta em 12s */
+      clearTimeout(recTO);recTO=setTimeout(()=>{try{rec.stop();}catch(e){}},12000);
+    }catch(e){
+      setStatus('Microfone ocupado. Espera 1s e toca de novo.');
+      try{rec.abort();}catch(_){}
+    }
+  });
+}else{
+  mic.style.opacity=.4;
+  mic.addEventListener('click',()=>setStatus('Este navegador não tem reconhecimento de voz. Use o campo de texto.'));
+}
 
 /* ---------- explorar ---------- */
 const FRASES=[
@@ -657,9 +736,9 @@ const FRASES=[
 let cityF='Todas';
 function renderCities(){
   const cs=[{n:'Todas',c:'Bogotá'},{n:'Bogotá',c:'Bogotá'},{n:'Medellín',c:'Medellín'},{n:'Cartagena',c:'Cartagena'}];
-  document.getElementById('cities').innerHTML=cs.map(x=>
+  document.getElementById('cities').innerHTML=cs.map((x,j)=>
     `<button class="cty" onclick="cityF='${x.n}';renderList()" style="${cityF===x.n?'outline:2.5px solid var(--azul);outline-offset:2px':''}">
-      <div class="ph" style="${bgFor(x.c)}"></div><div class="sc2"></div><b>${x.n}</b></button>`).join('');
+      <div class="ph" style="${bgFor(x.c,j)}"></div><div class="sc2"></div><b>${x.n}</b></button>`).join('');
 }
 function renderList(){
   renderCities();
@@ -693,7 +772,7 @@ document.getElementById('cfg-med').value=S.fotos.medellin||'';
 document.getElementById('cfg-car').value=S.fotos.cartagena||'';
 
 /* BOOT */
-renderStories();renderFeed();renderList();renderPf();stats();
+renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 </script>
 </body>
 </html>
