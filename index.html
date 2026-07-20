@@ -280,7 +280,7 @@ button{font-family:inherit}
         <input id="cfg-med" placeholder="URL da foto de Medellín" autocomplete="off">
         <input id="cfg-car" placeholder="URL da foto de Cartagena" autocomplete="off">
         <button onclick="salvarFotos()">Aplicar fotos</button>
-        <p class="note">O app já procura os arquivos <b>bogota_1/2/3.jpg</b>, <b>medelin_1/2/3.jpg</b> e <b>cartagena_1/2/3.jpg</b> na mesma pasta deste HTML. Os campos acima só servem pra sobrescrever com uma URL externa.</p>
+        <p class="note">O app procura sozinho os arquivos <b>bogota_1/2/3</b>, <b>medelin_1/2/3</b> e <b>cartagena_1/2/3</b> na mesma pasta deste HTML, testando as extensões .jpg.png, .jpg, .png e .jpeg. Os campos acima só servem pra sobrescrever com uma URL externa.</p>
         <div id="diag" style="margin-top:12px;font-size:12.5px;font-weight:600;line-height:1.9"></div>
       </div>
       <div class="cfg">
@@ -322,17 +322,33 @@ button{font-family:inherit}
    PARCERO · feed claro — contraste AA+, paleta da bandeira
    ===================================================== */
 /* =====================================================
-   FOTOS DAS CIDADES — 3 por cidade, na MESMA pasta do HTML
-   Os nomes abaixo precisam bater EXATAMENTE com os arquivos.
-   Cada post/story usa uma foto diferente da cidade (rodízio).
-   Se algum arquivo não existir, o app pula pra próxima foto
-   e, se nenhuma carregar, usa a cena vetorial (offline).
+   FOTOS DAS CIDADES — na MESMA pasta deste HTML
+   Os arquivos no repo estão como "bogota_1.jpg.png" (extensão
+   dupla). Em vez de fixar um nome só, o app testa as variações
+   abaixo e usa as que existirem. Se você renomear os arquivos
+   depois, continua funcionando sem mexer aqui.
    ===================================================== */
-const FOTOS_PADRAO={
-  bogota:['bogota_1.jpg','bogota_2.jpg','bogota_3.jpg'],
-  medellin:['medelin_1.jpg','medelin_2.jpg','medelin_3.jpg'],
-  cartagena:['cartagena_1.jpg','cartagena_2.jpg','cartagena_3.jpg']
+const EXTENSOES=['.jpg.png','.jpg','.png','.jpeg','.JPG','.PNG'];
+const BASES={
+  bogota:['bogota_1','bogota_2','bogota_3'],
+  medellin:['medelin_1','medelin_2','medelin_3'],
+  cartagena:['cartagena_1','cartagena_2','cartagena_3']
 };
+/* monta todos os candidatos: base + cada extensão */
+const FOTOS_PADRAO={};
+Object.keys(BASES).forEach(k=>{
+  FOTOS_PADRAO[k]=[];
+  BASES[k].forEach(b=>EXTENSOES.forEach(e=>FOTOS_PADRAO[k].push(b+e)));
+});
+/* =====================================================
+   CLOUD FUNCTION — proxy da API Anthropic
+   Formato padrão do Firebase para o projeto parcero-71c5d.
+   Se o deploy tiver gerado outra URL (funções v2 às vezes
+   entregam um endereço .a.run.app), cole a URL correta em
+   Perfil → Cloud Function, que ela sobrescreve esta.
+   ===================================================== */
+const FN_PADRAO='https://southamerica-east1-parcero-71c5d.cloudfunctions.net/parcero';
+function fnAtiva(){return (S.fnUrl&&S.fnUrl.trim())||FN_PADRAO;}
 const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{}};
 function salvar(){try{localStorage.setItem('parcero_feed_v2',JSON.stringify(S));}catch(e){}}
 (function(){try{const d=JSON.parse(localStorage.getItem('parcero_feed_v2'));if(d)Object.assign(S,d);}catch(e){}})();
@@ -391,11 +407,11 @@ const SCENES={
   </svg>`)
 };
 function keyOf(city){return city==='Medellín'?'medellin':city==='Cartagena'?'cartagena':'bogota';}
-const FOTOS_FALHOU={};
-/* prioridade: URL colada no Perfil > fotos do repo (rodízio) > cena SVG */
+const FOTOS_FALHOU={},FOTOS_OK={};
+/* prioridade: URL colada no Perfil > fotos CONFIRMADAS do repo > cena SVG */
 function urlDe(key,variante){
   if(S.fotos[key])return S.fotos[key];
-  const ok=(FOTOS_PADRAO[key]||[]).filter(f=>!FOTOS_FALHOU[f]);
+  const ok=(FOTOS_PADRAO[key]||[]).filter(f=>FOTOS_OK[f]);
   if(!ok.length)return null;
   return ok[Math.abs(variante||0)%ok.length];
 }
@@ -404,14 +420,13 @@ function bgFor(city,variante){
   return u?`background-image:url('${u}'),${SCENES[key]}`:`background-image:${SCENES[key]}`;
 }
 function isFoto(city,variante){return !!urlDe(keyOf(city),variante);}
-/* testa cada arquivo; o que não existir é marcado e sai do rodízio */
-const FOTOS_OK={};
+/* testa cada candidato; só os que carregarem entram no rodízio */
 (function testarFotos(){
   Object.keys(FOTOS_PADRAO).forEach(k=>{
     FOTOS_PADRAO[k].forEach(f=>{
       const img=new Image();
       img.onload=()=>{FOTOS_OK[f]=true;renderDiag();redesenhar();};
-      img.onerror=()=>{FOTOS_FALHOU[f]=true;renderDiag();redesenhar();};
+      img.onerror=()=>{FOTOS_FALHOU[f]=true;renderDiag();};
       img.src=f;
     });
   });
@@ -420,12 +435,11 @@ function renderDiag(){
   const el=document.getElementById('diag');if(!el)return;
   let h='';
   Object.keys(FOTOS_PADRAO).forEach(k=>{
-    FOTOS_PADRAO[k].forEach(f=>{
-      const st=FOTOS_OK[f]?'<b style="color:var(--verde)">✅ encontrada</b>'
-              :FOTOS_FALHOU[f]?'<b style="color:var(--rojo)">❌ não achei</b>'
-              :'⏳ testando…';
-      h+=`<div>${f} — ${st}</div>`;
-    });
+    const achadas=FOTOS_PADRAO[k].filter(f=>FOTOS_OK[f]);
+    const nome=k==='bogota'?'Bogotá':k==='medellin'?'Medellín':'Cartagena';
+    h+=achadas.length
+      ? `<div><b style="color:var(--verde)">✅ ${nome}</b> — ${achadas.length} foto(s): ${achadas.join(', ')}</div>`
+      : `<div><b style="color:var(--rojo)">❌ ${nome}</b> — nenhuma encontrada (usando desenho)</div>`;
   });
   el.innerHTML=h;
 }
@@ -625,8 +639,21 @@ async function llamar(text){
   hist.push({role:'user',content:text});
   const sys=CHARS[cur].sys+`\nRESPONDE SOLO un JSON válido, sin markdown: {"es":"respuesta hablada corta","dica":"dica curta em português BR sobre a fala do usuário ou como responder melhor","sugerencia":"frase pronta em espanhol para o usuário usar agora, ou string vazia"}`;
   let raw='';
-  if(S.fnUrl){const r=await fetch(S.fnUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:hist,max_tokens:1000})});const d=await r.json();raw=d.text||d.content||'';}
-  else{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:hist})});const d=await r.json();raw=(d.content||[]).map(c=>c.type==='text'?c.text:'').join('');}
+  const url=fnAtiva();
+  const local=/^(localhost|127\.|file)/.test(location.hostname)||location.protocol==='blob:';
+  if(url&&!local){
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system:sys,messages:hist,max_tokens:1000})});
+    if(!r.ok){
+      let det='';try{const e=await r.json();det=e.error||'';}catch(_){}
+      throw new Error('HTTP '+r.status+(det?' · '+det:''));
+    }
+    const d=await r.json();raw=d.text||d.content||'';
+  }else{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:hist})});
+    const d=await r.json();raw=(d.content||[]).map(c=>c.type==='text'?c.text:'').join('');
+  }
   hist.push({role:'assistant',content:raw});if(hist.length>16)hist=hist.slice(-16);
   try{return JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){return{es:raw,dica:'',sugerencia:''};}}
 async function enviar(t){t=(t||'').trim();if(!t)return;
@@ -635,7 +662,17 @@ async function enviar(t){t=(t||'').trim();if(!t)return;
   try{const r=await llamar(t);
     w.innerHTML=`${r.es} <span class="rp" onclick="falar('${esc(r.es)}')">🔊</span>`+(r.dica?`<span class="dica">💡 ${r.dica}</span>`:'')+(r.sugerencia?`<span class="sug">🗣️ Tenta: "${r.sugerencia}"</span>`:'');
     falar(r.es);S.turnos[cur]=(S.turnos[cur]||0)+1;salvar();ganharXP(15,'charla');}
-  catch(e){w.innerHTML='⚠️ Não consegui responder. '+(S.fnUrl?'Confere a URL no Perfil.':'No GitHub Pages, configure a Cloud Function no Perfil.');}}
+  catch(e){
+    const msg=String(e.message||e);
+    let dica='';
+    if(/404/.test(msg))dica='A URL da função está errada. Pegue a "Function URL" no console do Firebase e cole em Perfil.';
+    else if(/403|401/.test(msg))dica='A função existe mas negou o acesso. Confira se ela está pública (allUsers / Cloud Run Invoker).';
+    else if(/500/.test(msg))dica='A função respondeu com erro — normalmente é a chave da Anthropic ou saldo. Veja os logs no Firebase.';
+    else if(/Failed to fetch|NetworkError|Load failed/.test(msg))dica='Não alcancei a função (CORS ou URL inexistente). Confirme a URL em Perfil.';
+    w.innerHTML='⚠️ Não consegui responder.<br><span style="font-size:13px;color:var(--rojo-ink)">'+msg+'</span>'
+      +(dica?'<br><span style="font-size:13px">'+dica+'</span>':'')
+      +'<br><span style="font-size:12px;color:var(--ink2)">URL usada: '+fnAtiva()+'</span>';
+  }}
 document.getElementById('ss').addEventListener('click',()=>enviar(document.getElementById('si').value));
 document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')enviar(e.target.value);});
 
@@ -765,8 +802,10 @@ function renderPf(){
 }
 document.querySelectorAll('.pftabs button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.pftabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');pfTab=b.dataset.pf;renderPf();}));
-function salvarCfg(){S.fnUrl=document.getElementById('cfg-fn').value.trim();salvar();toast(S.fnUrl?'Cloud Function salva':'Usando API direta');}
-document.getElementById('cfg-fn').value=S.fnUrl||'';
+function salvarCfg(){S.fnUrl=document.getElementById('cfg-fn').value.trim();salvar();
+  document.getElementById('cfg-fn').value=fnAtiva();
+  toast(S.fnUrl?'URL salva ✅':'Voltou para a URL padrão');}
+document.getElementById('cfg-fn').value=fnAtiva();
 document.getElementById('cfg-bog').value=S.fotos.bogota||'';
 document.getElementById('cfg-med').value=S.fotos.medellin||'';
 document.getElementById('cfg-car').value=S.fotos.cartagena||'';
