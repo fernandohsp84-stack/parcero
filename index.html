@@ -240,13 +240,54 @@ button{font-family:inherit}
 .nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom));flex-shrink:0}
 .nav button{flex:1;background:none;border:none;font-size:21px;opacity:.38;color:var(--ink)}
 .nav button.on{opacity:1}
+/* ===== Seletor de perfil ===== */
+#quien{position:fixed;inset:0;z-index:190;background:#fff;display:none;
+  flex-direction:column;align-items:center;justify-content:center;padding:28px 24px}
+#quien.on{display:flex}
+#quien h2{font-size:25px;font-weight:800;letter-spacing:-.03em;text-align:center;margin-top:14px}
+#quien .sub{font-size:15px;color:var(--ink2);font-weight:500;text-align:center;margin-top:6px;line-height:1.45}
+#quien .lista{width:100%;max-width:340px;margin:22px 0 6px;display:flex;flex-direction:column;gap:10px}
+#quien .pbtn{display:flex;align-items:center;gap:13px;width:100%;background:var(--bg2);border:1.5px solid var(--line);
+  border-radius:15px;padding:15px 16px;font-size:17px;font-weight:700;color:var(--ink);text-align:left}
+#quien .pbtn .ini{width:40px;height:40px;border-radius:50%;background:var(--azul);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0}
+#quien .pbtn .meta{margin-left:auto;font-size:12.5px;color:var(--ink2);font-weight:600;text-align:right}
+#quien .pbtn .del{background:none;border:none;color:var(--ink2);font-size:19px;padding:0 2px}
+#quien .novo{width:100%;max-width:340px;margin-top:14px;display:flex;gap:9px}
+#quien input{flex:1;background:var(--bg2);border:1.5px solid var(--line);border-radius:14px;
+  padding:14px 15px;font-size:16px;font-weight:600;color:var(--ink);font-family:inherit}
+#quien .add{background:var(--ink);color:#fff;border:none;border-radius:14px;padding:0 20px;font-size:15px;font-weight:700}
+
+/* ===== Progresso do curso ===== */
+.prog-card{margin:6px 16px 16px;background:var(--bg2);border-radius:16px;padding:18px}
+.prog-top{display:flex;align-items:center;gap:16px}
+.prog-ring{width:82px;height:82px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;position:relative}
+.prog-ring .in{width:64px;height:64px;border-radius:50%;background:var(--bg2);display:flex;
+  align-items:center;justify-content:center;font-size:19px;font-weight:800}
+.prog-top .txt h4{font-size:16.5px;font-weight:800}
+.prog-top .txt p{font-size:13.5px;color:var(--ink2);font-weight:600;margin-top:3px;line-height:1.4}
+.prog-lin{margin-top:16px;display:flex;flex-direction:column;gap:11px}
+.pl{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700}
+.pl .nome{width:96px;flex-shrink:0}
+.pl .barra{flex:1;height:8px;background:#E3E3E6;border-radius:999px;overflow:hidden}
+.pl .barra i{display:block;height:100%;border-radius:999px;transition:width .5s}
+.pl .n{font-size:12.5px;color:var(--ink2);font-weight:700;width:44px;text-align:right;flex-shrink:0}
+.prog-falta{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;
+  font-weight:600;color:var(--ink2);line-height:1.5}
+.prog-falta b{color:var(--ink)}
+.trocar{width:100%;margin-top:12px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink);
+  border-radius:12px;padding:12px;font-size:14.5px;font-weight:700}
+
 /* ===== Splash de abertura ===== */
 #splash{position:fixed;inset:0;z-index:200;background:#fff;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:22px;transition:opacity .45s ease,visibility .45s}
 #splash.off{opacity:0;visibility:hidden;pointer-events:none}
 #splash .logo-wrap{position:relative;width:230px;height:230px;display:flex;align-items:center;justify-content:center}
-#splash .hero-bird{width:190px;height:190px;
-  animation:pop .85s cubic-bezier(.2,1.5,.4,1) both;position:relative;z-index:2}
+#splash .hero-bird{width:190px;height:190px;position:relative;z-index:2;
+  animation:pop .85s cubic-bezier(.2,1.5,.4,1) both, flutua 2.8s ease-in-out .9s infinite}
+@keyframes flutua{0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-9px) scale(1.02)}}
 #splash .ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;
   border-top-color:var(--amarillo);border-right-color:var(--azul);border-bottom-color:var(--rojo);
   animation:spin 1.5s linear infinite;opacity:0;animation-delay:.25s}
@@ -277,6 +318,17 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
+<div id="quien">
+  <div class="hero-bird bird" style="width:96px;height:96px"></div>
+  <h2>¿Quién está aprendiendo?</h2>
+  <div class="sub">Cada pessoa tem sua própria pontuação,<br>racha e progresso do curso.</div>
+  <div class="lista" id="qlista"></div>
+  <div class="novo">
+    <input id="qnome" placeholder="Nome de quem vai usar" maxlength="18" autocomplete="off">
+    <button class="add" onclick="criarPerfil()">Criar</button>
+  </div>
+</div>
+
 <div id="splash">
   <div class="logo-wrap">
     <div class="ring"></div>
@@ -327,6 +379,7 @@ button{font-family:inherit}
       </div>
       <div class="bio"><h3>Rumbo · tu oso guía</h3><p>8 días · Bogotá → Medellín → Cartagena</p></div>
       <div class="bar"><i id="pf-bar" style="width:0%"></i></div>
+      <div class="prog-card" id="prog"></div>
       <div class="hls" id="hls"></div>
       <div class="pftabs"><button class="on" data-pf="salvos">🔖</button><button data-pf="vistos">▦</button></div>
       <div class="pfgrid" id="pfgrid"></div>
@@ -406,9 +459,41 @@ Object.keys(BASES).forEach(k=>{
 const FN_PADRAO='https://southamerica-east1-parcero-71c5d.cloudfunctions.net/parcero';
 function fnAtiva(){return (S.fnUrl&&S.fnUrl.trim())||FN_PADRAO;}
 const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{}};
-function salvar(){try{localStorage.setItem('parcero_feed_v2',JSON.stringify(S));}catch(e){}}
-(function(){try{const d=JSON.parse(localStorage.getItem('parcero_feed_v2'));if(d)Object.assign(S,d);}catch(e){}})();
-(function(){const h=new Date().toDateString();if(S.ultDia!==h){const o=new Date(Date.now()-864e5).toDateString();S.streak=(S.ultDia===o)?S.streak+1:1;S.ultDia=h;salvar();}})();
+/* =====================================================
+   PERFIS — cada pessoa tem sua própria pontuação.
+   Em aparelhos diferentes a separação já é automática
+   (cada iPhone guarda seus dados). No MESMO aparelho,
+   o seletor abaixo mantém os progressos separados.
+   ===================================================== */
+let PERFIL = '';
+function chaveDados(){return 'parcero_dados_'+(PERFIL||'padrao');}
+function listaPerfis(){try{return JSON.parse(localStorage.getItem('parcero_perfis'))||[];}catch(e){return[];}}
+function gravarLista(l){try{localStorage.setItem('parcero_perfis',JSON.stringify(l));}catch(e){}}
+const VAZIO=()=>({xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{}});
+function salvar(){try{localStorage.setItem(chaveDados(),JSON.stringify(S));}catch(e){}}
+function carregarPerfil(nome){
+  PERFIL=nome;
+  try{localStorage.setItem('parcero_perfil_atual',nome);}catch(e){}
+  Object.keys(S).forEach(k=>delete S[k]);
+  Object.assign(S,VAZIO());
+  try{const d=JSON.parse(localStorage.getItem(chaveDados()));if(d)Object.assign(S,d);}catch(e){}
+  streakDoDia();
+}
+function streakDoDia(){
+  const h=new Date().toDateString();
+  if(S.ultDia!==h){const o=new Date(Date.now()-864e5).toDateString();
+    S.streak=(S.ultDia===o)?S.streak+1:1;S.ultDia=h;salvar();}
+}
+/* migra dados antigos (antes dos perfis) para o 1o perfil criado */
+function migrarAntigo(nome){
+  try{
+    const velho=localStorage.getItem('parcero_feed_v2');
+    if(velho&&!localStorage.getItem('parcero_dados_'+nome)){
+      localStorage.setItem('parcero_dados_'+nome,velho);
+    }
+  }catch(e){}
+}
+
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1900);}
 function nivel(){return Math.floor(S.xp/100)+1;}
 function ganharXP(n,m){S.xp+=n;salvar();stats();if(m)toast('+'+n+' 💎 '+m);}
@@ -849,6 +934,7 @@ document.getElementById('busca').addEventListener('input',renderList);
 const HLS=[{id:'uber',i:'🚗',n:'Uber'},{id:'hotel',i:'🛎️',n:'Hotel'},{id:'cafe',i:'☕',n:'Café'},{id:'mesero',i:'🍲',n:'Comida'}];
 let pfTab='salvos';
 function renderPf(){
+  renderProgresso();
   document.getElementById('hls').innerHTML=HLS.map(h=>`<button class="hh ${S.turnos[h.id]?'':'off'}" onclick="abrirSheet('${h.id}')"><div class="c">${h.i}</div><p>${h.n}</p></button>`).join('');
   const idx=Object.keys(pfTab==='salvos'?S.saves:S.vistos).filter(k=>!isNaN(k)).map(Number);
   const g=document.getElementById('pfgrid');
@@ -867,7 +953,121 @@ document.getElementById('cfg-med').value=S.fotos.medellin||'';
 document.getElementById('cfg-car').value=S.fotos.cartagena||'';
 
 /* BOOT */
+/* ---------- Boot: define o perfil antes de montar as telas ---------- */
+(function iniciarPerfil(){
+  const l=listaPerfis();
+  let atual='';
+  try{atual=localStorage.getItem('parcero_perfil_atual')||'';}catch(e){}
+  if(atual&&l.includes(atual)){carregarPerfil(atual);}
+  else if(l.length===1){carregarPerfil(l[0]);}
+  else{carregarPerfil(atual||'padrao');setTimeout(abrirQuien,300);}
+})();
+
 renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
+
+/* =====================================================
+   PROGRESSO DO CURSO
+   O curso é considerado completo quando você viu todos
+   os posts, todos os stories e conversou pelo menos 3
+   vezes com cada um dos 4 personagens.
+   ===================================================== */
+const META_TURNOS=3;
+function progresso(){
+  const postsTot=POSTS.length;
+  const postsFeitos=Object.keys(S.vistos).filter(k=>!isNaN(k)).length;
+  const stTot=STORIES.length;
+  const stFeitos=STORIES.filter(x=>S.vistos['st'+x.id]).length;
+  const chTot=Object.keys(CHARS).length;
+  const chFeitos=Object.keys(CHARS).filter(k=>(S.turnos[k]||0)>=META_TURNOS).length;
+  const tot=postsTot+stTot+chTot, feito=postsFeitos+stFeitos+chFeitos;
+  return {postsTot,postsFeitos,stTot,stFeitos,chTot,chFeitos,
+          tot,feito,pct:tot?Math.round(feito/tot*100):0};
+}
+function renderProgresso(){
+  const el=document.getElementById('prog');if(!el)return;
+  const p=progresso();
+  const cor=p.pct>=100?'var(--verde)':p.pct>=50?'var(--azul)':'var(--amarillo)';
+  const linha=(nome,f,t,c)=>`<div class="pl"><span class="nome">${nome}</span>
+    <span class="barra"><i style="width:${t?Math.round(f/t*100):0}%;background:${c}"></i></span>
+    <span class="n">${f}/${t}</span></div>`;
+  const faltamCh=Object.keys(CHARS).filter(k=>(S.turnos[k]||0)<META_TURNOS)
+      .map(k=>CHARS[k].nm.split('_')[0]);
+  let falta;
+  if(p.pct>=100){
+    falta='🎉 <b>Curso completo!</b> Você viu tudo e conversou com todos. Agora é revisar o que quiser antes de embarcar.';
+  }else{
+    const partes=[];
+    if(p.postsFeitos<p.postsTot)partes.push(`<b>${p.postsTot-p.postsFeitos}</b> post(s) no feed`);
+    if(p.stFeitos<p.stTot)partes.push(`<b>${p.stTot-p.stFeitos}</b> story(s)`);
+    if(faltamCh.length)partes.push(`conversar com <b>${faltamCh.join(', ')}</b>`);
+    falta='Para completar, faltam: '+partes.join(' · ')+'.';
+  }
+  el.innerHTML=`
+    <div class="prog-top">
+      <div class="prog-ring" style="background:conic-gradient(${cor} ${p.pct*3.6}deg, #E3E3E6 0)">
+        <div class="in">${p.pct}%</div>
+      </div>
+      <div class="txt">
+        <h4>${p.pct>=100?'Curso completo 🎉':'Progresso do curso'}</h4>
+        <p>${p.feito} de ${p.tot} etapas concluídas<br>Nivel ${nivel()} · ${S.xp} XP · racha de ${S.streak} dia(s)</p>
+      </div>
+    </div>
+    <div class="prog-lin">
+      ${linha('Feed',p.postsFeitos,p.postsTot,'var(--azul)')}
+      ${linha('Stories',p.stFeitos,p.stTot,'var(--amarillo)')}
+      ${linha('Conversas',p.chFeitos,p.chTot,'var(--rojo)')}
+    </div>
+    <div class="prog-falta">${falta}</div>
+    <button class="trocar" onclick="abrirQuien(true)">👥 Trocar de pessoa (${PERFIL})</button>`;
+}
+
+/* =====================================================
+   SELETOR DE PERFIL
+   ===================================================== */
+function resumoPerfil(nome){
+  try{
+    const d=JSON.parse(localStorage.getItem('parcero_dados_'+nome));
+    if(!d)return 'novo';
+    const n=Math.floor((d.xp||0)/100)+1;
+    return 'Nivel '+n+' · '+(d.xp||0)+' XP';
+  }catch(e){return 'novo';}
+}
+function renderQuien(){
+  const l=listaPerfis();
+  document.getElementById('qlista').innerHTML=l.map(n=>
+    `<div class="pbtn" onclick="usarPerfil('${n.replace(/'/g,"\\'")}')">
+      <span class="ini">${n.charAt(0).toUpperCase()}</span>
+      <span>${n}</span>
+      <span class="meta">${resumoPerfil(n)}</span>
+      <button class="del" onclick="event.stopPropagation();apagarPerfil('${n.replace(/'/g,"\\'")}')">🗑️</button>
+    </div>`).join('')||'<div class="sub" style="margin:0">Ninguém cadastrado ainda.<br>Crie o primeiro perfil abaixo 👇</div>';
+}
+function abrirQuien(){renderQuien();document.getElementById('quien').classList.add('on');}
+function fecharQuien(){document.getElementById('quien').classList.remove('on');}
+function criarPerfil(){
+  const inp=document.getElementById('qnome');
+  const nome=(inp.value||'').trim();
+  if(!nome){toast('Digite um nome');return;}
+  const l=listaPerfis();
+  if(l.includes(nome)){toast('Esse nome já existe');return;}
+  if(!l.length)migrarAntigo(nome);       /* aproveita o progresso que já existia */
+  l.push(nome);gravarLista(l);inp.value='';
+  usarPerfil(nome);
+}
+function usarPerfil(nome){
+  carregarPerfil(nome);
+  fecharQuien();
+  document.getElementById('cfg-fn').value=fnAtiva();
+  redesenhar();renderPf();stats();renderDiag();
+  toast('¡Hola, '+nome+'!');
+}
+function apagarPerfil(nome){
+  if(!confirm('Apagar o perfil "'+nome+'" e todo o progresso dele?'))return;
+  const l=listaPerfis().filter(x=>x!==nome);gravarLista(l);
+  try{localStorage.removeItem('parcero_dados_'+nome);}catch(e){}
+  if(PERFIL===nome){PERFIL='';try{localStorage.removeItem('parcero_perfil_atual');}catch(e){}}
+  renderQuien();
+}
 
 /* ---------- Splash de abertura ---------- */
 (function splash(){
