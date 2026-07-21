@@ -428,6 +428,30 @@ button{font-family:inherit}
 
 <script>
 /* =====================================================
+   SPLASH — roda ANTES de tudo e fecha por conta própria.
+   Fica no topo de propósito: se qualquer código abaixo
+   falhar, a abertura fecha do mesmo jeito e o app aparece.
+   ===================================================== */
+(function splash(){
+  const el=document.getElementById('splash');
+  if(!el)return;
+  const anel=el.querySelector('.ring');
+  setTimeout(()=>{if(anel)anel.classList.add('on');},250);
+  let fechado=false;
+  const fechar=()=>{
+    if(fechado)return;fechado=true;
+    el.classList.add('off');
+    setTimeout(()=>{try{el.remove();}catch(e){}},600);
+  };
+  const rapido=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setTimeout(fechar, rapido?400:2500);            /* 2,5 segundos */
+  setTimeout(fechar, 6000);                       /* rede de segurança */
+  el.addEventListener('click',fechar);
+  el.addEventListener('touchend',fechar);
+  window.addEventListener('error',fechar);        /* erro no script? fecha assim mesmo */
+})();
+
+/* =====================================================
    PARCERO · feed claro — contraste AA+, paleta da bandeira
    ===================================================== */
 /* =====================================================
@@ -953,17 +977,7 @@ document.getElementById('cfg-med').value=S.fotos.medellin||'';
 document.getElementById('cfg-car').value=S.fotos.cartagena||'';
 
 /* BOOT */
-/* ---------- Boot: define o perfil antes de montar as telas ---------- */
-(function iniciarPerfil(){
-  const l=listaPerfis();
-  let atual='';
-  try{atual=localStorage.getItem('parcero_perfil_atual')||'';}catch(e){}
-  if(atual&&l.includes(atual)){carregarPerfil(atual);}
-  else if(l.length===1){carregarPerfil(l[0]);}
-  else{carregarPerfil(atual||'padrao');setTimeout(abrirQuien,300);}
-})();
 
-renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 
 /* =====================================================
    PROGRESSO DO CURSO
@@ -1069,19 +1083,18 @@ function apagarPerfil(nome){
   renderQuien();
 }
 
-/* ---------- Splash de abertura ---------- */
-(function splash(){
-  const el=document.getElementById('splash');if(!el)return;
-  const anel=el.querySelector('.ring');
-  setTimeout(()=>{if(anel)anel.classList.add('on');},250);
-  let fechado=false;
-  const fechar=()=>{if(fechado)return;fechado=true;el.classList.add('off');
-    setTimeout(()=>el.remove(),600);};
-  const rapido=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  setTimeout(fechar,rapido?400:3900);   /* fecha sozinho */
-  el.addEventListener('click',fechar);  /* ou toca pra pular */
-  el.addEventListener('touchend',fechar);
+
+/* ---------- Boot: define o perfil antes de montar as telas ---------- */
+(function iniciarPerfil(){
+  const l=listaPerfis();
+  let atual='';
+  try{atual=localStorage.getItem('parcero_perfil_atual')||'';}catch(e){}
+  if(atual&&l.includes(atual)){carregarPerfil(atual);}
+  else if(l.length===1){carregarPerfil(l[0]);}
+  else{carregarPerfil(atual||'padrao');setTimeout(abrirQuien,300);}
 })();
+
+renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 </script>
 </body>
 </html>
