@@ -276,9 +276,9 @@ button{font-family:inherit}
 #quien{position:fixed;inset:0;z-index:190;background:#fff;display:none;
   flex-direction:column;align-items:center;justify-content:center;padding:28px 24px}
 #quien.on{display:flex}
-#quien #qvolta{position:absolute;top:calc(14px + env(safe-area-inset-top));right:18px;
-  background:var(--bg2);border:none;color:var(--ink);width:40px;height:40px;border-radius:50%;
-  font-size:19px;font-weight:700;display:none}
+#quien #qvolta{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;
+  background:var(--bg2);border:none;color:var(--ink);padding:10px 16px;border-radius:999px;
+  font-size:14.5px;font-weight:700;display:none}
 #quien h2{font-size:25px;font-weight:800;letter-spacing:-.03em;text-align:center;margin-top:14px}
 #quien .sub{font-size:15px;color:var(--ink2);font-weight:500;text-align:center;margin-top:6px;line-height:1.45}
 #quien .lista{width:100%;max-width:340px;margin:22px 0 6px;display:flex;flex-direction:column;gap:10px}
@@ -395,7 +395,7 @@ button{font-family:inherit}
 </div>
 
 <div id="quien">
-  <button id="qvolta" onclick="fecharQuien()">✕</button>
+  <button id="qvolta" onclick="fecharQuien()">✕ Voltar</button>
   <div class="hero-bird bird" style="width:96px;height:96px"></div>
   <h2>¿Quién está aprendiendo?</h2>
   <div class="sub">Cada pessoa tem sua própria pontuação,<br>racha e progresso do curso.</div>
@@ -600,6 +600,12 @@ function migrarAntigo(nome){
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1900);}
 function nivel(){return Math.floor(S.xp/100)+1;}
 function ganharXP(n,m){S.xp+=n;salvar();stats();if(m)toast('+'+n+' 💎 '+m);}
+function voltarAoCurso(){
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));
+  const b=document.querySelector('.nav button[data-scr="scr-feed"]');
+  if(b)b.classList.add('on');
+  ir('scr-feed');
+}
 function irPerfil(){
   document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));
   const b=document.querySelector('.nav button[data-scr="scr-pf"]');
@@ -1119,7 +1125,8 @@ function renderProgresso(){
     </div>
     <div class="prog-falta">${falta}</div>
     <button class="trocar" onclick="abrirQuien(true)">👥 Trocar de pessoa (${PERFIL})</button>
-    <button class="trocar" onclick="abrirIntro(true)">📖 Rever como funciona o curso</button>`;
+    <button class="trocar" onclick="abrirIntro(true)">📖 Rever como funciona o curso</button>
+    <button class="trocar" style="background:var(--ink);color:#fff;border-color:var(--ink)" onclick="voltarAoCurso()">🏠 Voltar ao curso</button>`;
 }
 
 /* =====================================================
