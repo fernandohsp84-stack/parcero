@@ -276,6 +276,9 @@ button{font-family:inherit}
 #quien{position:fixed;inset:0;z-index:190;background:#fff;display:none;
   flex-direction:column;align-items:center;justify-content:center;padding:28px 24px}
 #quien.on{display:flex}
+#quien #qvolta{position:absolute;top:calc(14px + env(safe-area-inset-top));right:18px;
+  background:var(--bg2);border:none;color:var(--ink);width:40px;height:40px;border-radius:50%;
+  font-size:19px;font-weight:700;display:none}
 #quien h2{font-size:25px;font-weight:800;letter-spacing:-.03em;text-align:center;margin-top:14px}
 #quien .sub{font-size:15px;color:var(--ink2);font-weight:500;text-align:center;margin-top:6px;line-height:1.45}
 #quien .lista{width:100%;max-width:340px;margin:22px 0 6px;display:flex;flex-direction:column;gap:10px}
@@ -392,6 +395,7 @@ button{font-family:inherit}
 </div>
 
 <div id="quien">
+  <button id="qvolta" onclick="fecharQuien()">✕</button>
   <div class="hero-bird bird" style="width:96px;height:96px"></div>
   <h2>¿Quién está aprendiendo?</h2>
   <div class="sub">Cada pessoa tem sua própria pontuação,<br>racha e progresso do curso.</div>
@@ -1115,14 +1119,15 @@ function renderProgresso(){
     </div>
     <div class="prog-falta">${falta}</div>
     <button class="trocar" onclick="abrirQuien(true)">👥 Trocar de pessoa (${PERFIL})</button>
-    <button class="trocar" onclick="abrirIntro()">📖 Rever como funciona o curso</button>`;
+    <button class="trocar" onclick="abrirIntro(true)">📖 Rever como funciona o curso</button>`;
 }
 
 /* =====================================================
    INTRODUÇÃO — explica o app antes de cadastrar o nome
    ===================================================== */
-let iSlide=0;
-function abrirIntro(){
+let iSlide=0, introManual=false;
+function abrirIntro(manual){
+  introManual=!!manual;
   iSlide=0;mostrarSlide();
   document.getElementById('intro').classList.add('on');
 }
@@ -1139,8 +1144,12 @@ function proxIntro(){
   else fimIntro();
 }
 function fimIntro(){
-  document.getElementById('intro').classList.remove('on');
+  const el=document.getElementById('intro');
+  if(!el||!el.classList.contains('on'))return;   /* já estava fechada: não faz nada */
+  el.classList.remove('on');
   try{localStorage.setItem('parcero_intro','1');}catch(e){}
+  /* se foi aberta pelo Perfil, apenas fecha e volta pro app */
+  if(introManual){introManual=false;return;}
   abrirQuien();
 }
 
@@ -1165,7 +1174,15 @@ function renderQuien(){
       <button class="del" onclick="event.stopPropagation();apagarPerfil('${n.replace(/'/g,"\\'")}')">🗑️</button>
     </div>`).join('')||'<div class="sub" style="margin:0">Ninguém cadastrado ainda.<br>Crie o primeiro perfil abaixo 👇</div>';
 }
-function abrirQuien(){renderQuien();document.getElementById('quien').classList.add('on');}
+function abrirQuien(){
+  renderQuien();
+  /* o botão de voltar só aparece se já houver alguém cadastrado —
+     assim ninguém fica preso na primeira abertura */
+  const x=document.getElementById('qvolta');
+  const podeVoltar=listaPerfis().length>0;
+  if(x)x.style.display=podeVoltar?'block':'none';
+  document.getElementById('quien').classList.add('on');
+}
 function fecharQuien(){document.getElementById('quien').classList.remove('on');}
 function criarPerfil(){
   const inp=document.getElementById('qnome');
