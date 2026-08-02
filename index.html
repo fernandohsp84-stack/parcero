@@ -184,17 +184,17 @@ button{font-family:inherit}
 
 /* ===== Conversa estilo Reels: orbe + legenda ===== */
 .sheet{height:88%}
-.orb-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+.orb-stage{flex:0 0 auto;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(120% 90% at 50% 30%,#0E1230 0%,#050814 100%);position:relative;min-height:0}
-.orb{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center}
-.orb-core{position:absolute;width:88px;height:88px;border-radius:50%;
+.orb{position:relative;width:104px;height:104px;display:flex;align-items:center;justify-content:center}
+.orb-core{position:absolute;width:62px;height:62px;border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#8FE3FF,#2D6BFF 55%,#003893 100%);
   box-shadow:0 0 40px rgba(45,107,255,.6);transition:all .4s ease}
-.orb-glow{position:absolute;width:150px;height:150px;border-radius:50%;
+.orb-glow{position:absolute;width:104px;height:104px;border-radius:50%;
   background:radial-gradient(circle,rgba(45,107,255,.35),transparent 65%);animation:breathe 3.5s ease-in-out infinite}
 .orb-ring{position:absolute;border-radius:50%;border:2px solid rgba(143,227,255,.35)}
-.orb-ring.r1{width:120px;height:120px}
-.orb-ring.r2{width:150px;height:150px;border-color:rgba(143,227,255,.18)}
+.orb-ring.r1{width:84px;height:84px}
+.orb-ring.r2{width:104px;height:104px;border-color:rgba(143,227,255,.18)}
 @keyframes breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.12);opacity:1}}
 
 /* estado: OUVINDO (vermelho, pulsando forte) */
@@ -217,10 +217,10 @@ button{font-family:inherit}
   box-shadow:0 0 48px rgba(10,123,79,.6);animation:pulseCore 1.4s ease-in-out infinite}
 .orb.speaking .orb-glow{background:radial-gradient(circle,rgba(10,123,79,.4),transparent 65%);animation:breathe 1.4s ease-in-out infinite}
 
-.orb-status{margin-top:22px;color:rgba(255,255,255,.85);font-size:14px;font-weight:600;
+.orb-status{margin-top:16px;color:rgba(255,255,255,.85);font-size:14px;font-weight:600;
   letter-spacing:.02em;text-align:center;padding:0 30px}
 
-.caption{background:var(--bg);padding:18px 20px;min-height:120px;max-height:38%;overflow-y:auto;
+.caption{flex:1;background:var(--bg);padding:20px;min-height:120px;overflow-y:auto;
   border-top:1px solid var(--line)}
 .cap-es{font-size:22px;font-weight:800;color:var(--ink);line-height:1.3;letter-spacing:-.02em}
 .cap-es .cursor{display:inline-block;width:2px;height:22px;background:var(--azul);margin-left:2px;
@@ -565,7 +565,7 @@ button{font-family:inherit}
         <input id="cfg-fn" placeholder="https://southamerica-east1-….cloudfunctions.net/parcero" autocomplete="off">
         <button onclick="salvarCfg()">Salvar Cloud Function</button>
         <button onclick="testarVoz()">🔊 Testar voz em español</button>
-        <button id="btn-neural" onclick="toggleNeural()">🎧 Voz neural: desligada</button>
+        <button id="btn-neural" onclick="toggleNeural()">🎧 Voz neural: ligada</button>
         <p class="note">A voz neural (colombiana premium) precisa da Cloud Function com Google TTS ou ElevenLabs configurado. Sem isso, o app usa a voz do próprio iPhone.</p>
       </div>
     </div>
@@ -671,7 +671,7 @@ Object.keys(BASES).forEach(k=>{
    ===================================================== */
 const FN_PADRAO='https://southamerica-east1-parcero-71c5d.cloudfunctions.net/parcero';
 function fnAtiva(){return (S.fnUrl&&S.fnUrl.trim())||FN_PADRAO;}
-const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:false};
+const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:true};
 /* =====================================================
    PERFIS — cada pessoa tem sua própria pontuação.
    Em aparelhos diferentes a separação já é automática
@@ -682,7 +682,7 @@ let PERFIL = '';
 function chaveDados(){return 'parcero_dados_'+(PERFIL||'padrao');}
 function listaPerfis(){try{return JSON.parse(localStorage.getItem('parcero_perfis'))||[];}catch(e){return[];}}
 function gravarLista(l){try{localStorage.setItem('parcero_perfis',JSON.stringify(l));}catch(e){}}
-const VAZIO=()=>({xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:false});
+const VAZIO=()=>({xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:true});
 function salvar(){try{localStorage.setItem(chaveDados(),JSON.stringify(S));}catch(e){}}
 function carregarPerfil(nome){
   PERFIL=nome;
@@ -835,15 +835,22 @@ const audioCache={};
 function falarNeural(t){
   const url=fnAtiva();
   if(audioCache[t]){audioCache[t].currentTime=0;audioCache[t].play();return;}
+  /* fala já com a voz do iPhone (sem atraso) e, se a neural chegar,
+     usa a neural na próxima vez que a mesma frase tocar */
+  let neuralChegou=false;
+  falarLocal(t);
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({tts:t,voz:'es-CO'})})
     .then(r=>r.ok?r.json():Promise.reject())
     .then(d=>{
-      if(!d.audio)throw 0;
+      if(!d||!d.audio)return;              /* sem chave TTS: fica na voz local */
       const a=new Audio('data:audio/mp3;base64,'+d.audio);
-      audioCache[t]=a;a.play();
+      audioCache[t]=a;
+      /* se a voz local ainda estiver falando, troca pela neural */
+      try{speechSynthesis.cancel();}catch(e){}
+      a.play();
     })
-    .catch(()=>falarLocal(t));   /* qualquer falha: cai na voz do aparelho */
+    .catch(()=>{});                        /* falha: já falou local, nada a fazer */
 }
 function falarLocal(t){
   if(!('speechSynthesis'in window))return;
@@ -1504,7 +1511,7 @@ function apagarPerfil(nome){
   }
 })();
 
-const VERSAO='2026-07-21 · Gabo+voz+orbe-Reels';
+const VERSAO='2026-07-21 · voz-premium-padrao+orbe-menor';
 (function(){const e=document.getElementById('ver-app');if(e)e.textContent=VERSAO;})();
 renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 </script>
