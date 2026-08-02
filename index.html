@@ -181,6 +181,56 @@ button{font-family:inherit}
 .sh span{font-size:12.5px;color:var(--verde);font-weight:600}
 .sh .x{margin-left:auto;background:none;border:none;color:var(--ink2);font-size:23px}
 .sc{flex:1;overflow-y:auto;padding:16px 16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+
+/* ===== Conversa estilo Reels: orbe + legenda ===== */
+.sheet{height:88%}
+.orb-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(120% 90% at 50% 30%,#0E1230 0%,#050814 100%);position:relative;min-height:0}
+.orb{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center}
+.orb-core{position:absolute;width:88px;height:88px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#8FE3FF,#2D6BFF 55%,#003893 100%);
+  box-shadow:0 0 40px rgba(45,107,255,.6);transition:all .4s ease}
+.orb-glow{position:absolute;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,107,255,.35),transparent 65%);animation:breathe 3.5s ease-in-out infinite}
+.orb-ring{position:absolute;border-radius:50%;border:2px solid rgba(143,227,255,.35)}
+.orb-ring.r1{width:120px;height:120px}
+.orb-ring.r2{width:150px;height:150px;border-color:rgba(143,227,255,.18)}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.12);opacity:1}}
+
+/* estado: OUVINDO (vermelho, pulsando forte) */
+.orb.listening .orb-core{background:radial-gradient(circle at 35% 30%,#FF9DAF,#FF3B5C 55%,#CE1126 100%);
+  box-shadow:0 0 50px rgba(255,59,92,.7);animation:pulseCore .8s ease-in-out infinite}
+.orb.listening .orb-glow{background:radial-gradient(circle,rgba(255,59,92,.4),transparent 65%);animation:breathe 1s ease-in-out infinite}
+.orb.listening .orb-ring{border-color:rgba(255,157,175,.5);animation:ripple 1.2s ease-out infinite}
+@keyframes pulseCore{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes ripple{0%{transform:scale(.85);opacity:.7}100%{transform:scale(1.25);opacity:0}}
+
+/* estado: PENSANDO (amarelo, girando) */
+.orb.thinking .orb-core{background:radial-gradient(circle at 35% 30%,#FFE79A,#FCD116 55%,#D9A400 100%);
+  box-shadow:0 0 44px rgba(252,209,22,.6)}
+.orb.thinking .orb-ring.r1{border-top-color:#FCD116;border-right-color:transparent;border-bottom-color:transparent;border-left-color:transparent;animation:spin .8s linear infinite}
+.orb.thinking .orb-ring.r2{border-bottom-color:#FCD116;border-top-color:transparent;border-right-color:transparent;border-left-color:transparent;animation:spin 1.1s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* estado: FALANDO (verde/azul, ondas) */
+.orb.speaking .orb-core{background:radial-gradient(circle at 35% 30%,#7DF0C0,#0A7B4F 60%,#065C3B 100%);
+  box-shadow:0 0 48px rgba(10,123,79,.6);animation:pulseCore 1.4s ease-in-out infinite}
+.orb.speaking .orb-glow{background:radial-gradient(circle,rgba(10,123,79,.4),transparent 65%);animation:breathe 1.4s ease-in-out infinite}
+
+.orb-status{margin-top:22px;color:rgba(255,255,255,.85);font-size:14px;font-weight:600;
+  letter-spacing:.02em;text-align:center;padding:0 30px}
+
+.caption{background:var(--bg);padding:18px 20px;min-height:120px;max-height:38%;overflow-y:auto;
+  border-top:1px solid var(--line)}
+.cap-es{font-size:22px;font-weight:800;color:var(--ink);line-height:1.3;letter-spacing:-.02em}
+.cap-es .cursor{display:inline-block;width:2px;height:22px;background:var(--azul);margin-left:2px;
+  vertical-align:middle;animation:blink .8s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.cap-dica{font-size:14px;font-weight:600;color:var(--rojo-ink);margin-top:12px;line-height:1.45;display:none}
+.cap-dica.on{display:block}
+.cap-sug{font-size:14px;font-weight:700;color:var(--verde);margin-top:8px;line-height:1.45;display:none}
+.cap-sug.on{display:block}
+.cap-sug .play{cursor:pointer;opacity:.7;margin-left:5px}
 .msg{max-width:86%;padding:12px 15px;border-radius:19px;font-size:15.5px;font-weight:500;line-height:1.45}
 .msg.them{background:var(--bg2);color:var(--ink);border-bottom-left-radius:5px;align-self:flex-start}
 .msg.me{background:var(--azul);color:#fff;border-bottom-right-radius:5px;align-self:flex-end;font-weight:600}
@@ -271,6 +321,36 @@ button{font-family:inherit}
 #intro .avanca{margin-left:auto;background:var(--ink);color:#fff;border:none;border-radius:14px;
   padding:14px 26px;font-size:16px;font-weight:700}
 #intro .pular{background:none;border:none;color:var(--ink2);font-size:14.5px;font-weight:600}
+
+/* ===== Módulo Gabo ===== */
+.gabo-scroll{flex:1;overflow-y:auto;padding:18px 16px 90px}
+.gabo-hero{background:linear-gradient(135deg,#8A5A2B,#5E3A18);color:#fff;border-radius:18px;padding:22px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.gabo-hero .tag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.gabo-hero h2{font-size:25px;font-weight:800;letter-spacing:-.03em;margin-top:6px}
+.gabo-hero p{font-size:14.5px;font-weight:500;opacity:.94;line-height:1.5;margin-top:8px}
+.gabo-hero .mari{position:absolute;right:-10px;bottom:-14px;font-size:88px;opacity:.16}
+.gabo-sec{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:22px 4px 10px}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 16px;margin-bottom:10px;box-shadow:0 2px 0 var(--line)}
+.gcard .es{font-size:18px;font-weight:800;color:var(--ink)}
+.gcard .pt{font-size:14px;color:var(--ink2);font-weight:500;margin-top:3px;line-height:1.45}
+.gcard .ex{font-size:13.5px;color:var(--azul-ink);font-weight:600;margin-top:8px;font-style:italic;background:var(--azul-t);padding:8px 11px;border-radius:10px}
+.gcard .ex-play{cursor:pointer;margin-left:6px;opacity:.6}
+.gcult{background:var(--amarillo-t);border:1px solid #F0DC9A;border-radius:16px;padding:15px 16px;margin-bottom:10px}
+.gcult h4{font-size:16px;font-weight:800;color:var(--amarillo-ink)}
+.gcult p{font-size:14px;color:#6B5410;font-weight:500;line-height:1.5;margin-top:5px}
+.gq{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-bottom:10px;box-shadow:0 2px 0 var(--line)}
+.gq .qh{font-size:16.5px;font-weight:800;line-height:1.3;margin-bottom:14px}
+.gq .qo{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);color:var(--ink);border-radius:12px;padding:13px 15px;font-size:15px;font-weight:600;margin-bottom:8px}
+.gq .qo:active{background:var(--bg2)}
+.gq .qo.right{background:var(--verde-t);border-color:var(--verde);color:#065C3B;font-weight:700}
+.gq .qo.wrong{background:var(--rojo-t);border-color:var(--rojo);color:var(--rojo-ink);font-weight:700}
+.gq .qfb{font-size:13.5px;font-weight:700;margin-top:6px;min-height:18px}
+.gq .qfb.ok{color:var(--verde)}.gq .qfb.bad{color:var(--rojo-ink)}
+.grp{background:linear-gradient(135deg,#5E3A18,#3A2410);color:#fff;border-radius:18px;padding:20px;margin-bottom:10px;cursor:pointer}
+.grp .rt{font-size:18px;font-weight:800}
+.grp .rd{font-size:14px;opacity:.9;font-weight:500;margin-top:5px;line-height:1.45}
+.grp .rb{display:inline-block;margin-top:14px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.3);border-radius:12px;padding:11px 18px;font-size:15px;font-weight:700}
+.glegal{font-size:11.5px;color:#8A8A8F;font-weight:500;line-height:1.5;margin:8px 4px 0}
 
 /* ===== Seletor de perfil ===== */
 #quien{position:fixed;inset:0;z-index:190;background:#fff;display:none;
@@ -444,6 +524,15 @@ button{font-family:inherit}
     <div class="list" id="list"></div>
   </section>
 
+  <section class="screen" id="scr-gabo">
+    <div class="topbar">
+      <span class="logo" style="font-size:18px"><span class="mark bird" style="width:26px;height:26px"></span>Gabo</span>
+      <button class="pill prog first" onclick="irPerfil()">📊 <b id="h-prog2">0%</b></button>
+      <span class="pill" style="background:var(--rojo-t);color:var(--rojo-ink)">📖 Nivel intermedio</span>
+    </div>
+    <div class="gabo-scroll" id="gabo-scroll"></div>
+  </section>
+
   <section class="screen" id="scr-pf">
     <div class="pf">
       <div class="topbar"><span class="logo" style="font-size:17px"><span class="mark bird" style="width:27px;height:27px"></span>tu_viaje_co</span></div>
@@ -476,6 +565,8 @@ button{font-family:inherit}
         <input id="cfg-fn" placeholder="https://southamerica-east1-….cloudfunctions.net/parcero" autocomplete="off">
         <button onclick="salvarCfg()">Salvar Cloud Function</button>
         <button onclick="testarVoz()">🔊 Testar voz em español</button>
+        <button id="btn-neural" onclick="toggleNeural()">🎧 Voz neural: desligada</button>
+        <p class="note">A voz neural (colombiana premium) precisa da Cloud Function com Google TTS ou ElevenLabs configurado. Sem isso, o app usa a voz do próprio iPhone.</p>
       </div>
     </div>
   </section>
@@ -483,6 +574,7 @@ button{font-family:inherit}
   <nav class="nav">
     <button class="on" data-scr="scr-feed">🏠</button>
     <button data-scr="scr-exp">🔍</button>
+    <button data-scr="scr-gabo">📖</button>
     <button data-scr="scr-pf">🐻</button>
   </nav>
 </div>
@@ -496,12 +588,30 @@ button{font-family:inherit}
 <div class="sheet" id="sheet">
   <div class="grab"></div>
   <div class="sh"><div class="av" id="sh-av">🚗</div><div><h3 id="sh-nm">Andrés</h3><span id="sh-role">tu Uber · en línea</span></div><button class="x" onclick="fecharSheet()">✕</button></div>
-  <div class="sc" id="sc"></div>
-  <div id="mic-status" style="display:none;padding:0 18px 8px;font-size:13px;font-weight:600;line-height:1.4"></div>
+
+  <!-- Palco do orbe (parte de cima) -->
+  <div class="orb-stage">
+    <div class="orb" id="orb">
+      <div class="orb-core"></div>
+      <div class="orb-ring r1"></div>
+      <div class="orb-ring r2"></div>
+      <div class="orb-glow"></div>
+    </div>
+    <div class="orb-status" id="orb-status">Toca no microfone e fala</div>
+  </div>
+
+  <!-- Legenda que aparece aos poucos (parte de baixo) -->
+  <div class="caption" id="caption">
+    <div class="cap-es" id="cap-es"></div>
+    <div class="cap-dica" id="cap-dica"></div>
+    <div class="cap-sug" id="cap-sug"></div>
+  </div>
+
+  <div id="mic-status" style="display:none;padding:0 18px 8px;font-size:13px;font-weight:600;line-height:1.4;text-align:center"></div>
   <div class="sf">
     <button class="mic" id="mic">🎙️</button>
     <input class="si" id="si" placeholder="Responde en español…" autocomplete="off">
-    <button class="ss" id="ss">Enviar</button>
+    <button class="ss" id="ss">➤</button>
   </div>
 </div>
 
@@ -561,7 +671,7 @@ Object.keys(BASES).forEach(k=>{
    ===================================================== */
 const FN_PADRAO='https://southamerica-east1-parcero-71c5d.cloudfunctions.net/parcero';
 function fnAtiva(){return (S.fnUrl&&S.fnUrl.trim())||FN_PADRAO;}
-const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{}};
+const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:false};
 /* =====================================================
    PERFIS — cada pessoa tem sua própria pontuação.
    Em aparelhos diferentes a separação já é automática
@@ -572,7 +682,7 @@ let PERFIL = '';
 function chaveDados(){return 'parcero_dados_'+(PERFIL||'padrao');}
 function listaPerfis(){try{return JSON.parse(localStorage.getItem('parcero_perfis'))||[];}catch(e){return[];}}
 function gravarLista(l){try{localStorage.setItem('parcero_perfis',JSON.stringify(l));}catch(e){}}
-const VAZIO=()=>({xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{}});
+const VAZIO=()=>({xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:false});
 function salvar(){try{localStorage.setItem(chaveDados(),JSON.stringify(S));}catch(e){}}
 function carregarPerfil(nome){
   PERFIL=nome;
@@ -613,7 +723,7 @@ function irPerfil(){
   ir('scr-pf');renderPf();
 }
 function stats(){const s=(i,v)=>{const e=document.getElementById(i);if(e)e.textContent=v;};
-  try{s('h-prog',progresso().pct+'%');}catch(e){}
+  try{s('h-prog',progresso().pct+'%');s('h-prog2',progresso().pct+'%');}catch(e){}
   s('h-xp',S.xp);s('h-streak',S.streak);s('n-nivel',nivel());
   s('n-salvos',Object.keys(S.saves).length);s('n-vistos',Object.keys(S.vistos).filter(k=>!isNaN(k)).length);
   const b=document.getElementById('pf-bar');if(b)b.style.width=(S.xp%100)+'%';}
@@ -713,18 +823,60 @@ function salvarFotos(){
 
 /* ---------- voz ---------- */
 let vozES=null,ttsOn=false;
-function acharVoz(){const v=speechSynthesis.getVoices();vozES=v.find(x=>/es[-_]CO/i.test(x.lang))||v.find(x=>/es[-_](MX|US|419)/i.test(x.lang))||v.find(x=>/^es/i.test(x.lang))||null;}
+function acharVoz(){const v=speechSynthesis.getVoices();
+  /* prioriza vozes de melhor qualidade (Enhanced/Premium) e colombianas */
+  const co=v.filter(x=>/es[-_]CO/i.test(x.lang));
+  const mx=v.filter(x=>/es[-_]MX/i.test(x.lang));
+  const es=v.filter(x=>/^es/i.test(x.lang));
+  const melhor=arr=>arr.find(x=>/(enhanced|premium|neural|siri)/i.test(x.name))||arr[0];
+  vozES=melhor(co)||melhor(mx)||melhor(es)||null;}
+/* cache de áudios neurais já baixados, pra não repetir chamada */
+const audioCache={};
+function falarNeural(t){
+  const url=fnAtiva();
+  if(audioCache[t]){audioCache[t].currentTime=0;audioCache[t].play();return;}
+  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({tts:t,voz:'es-CO'})})
+    .then(r=>r.ok?r.json():Promise.reject())
+    .then(d=>{
+      if(!d.audio)throw 0;
+      const a=new Audio('data:audio/mp3;base64,'+d.audio);
+      audioCache[t]=a;a.play();
+    })
+    .catch(()=>falarLocal(t));   /* qualquer falha: cai na voz do aparelho */
+}
+function falarLocal(t){
+  if(!('speechSynthesis'in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang=vozES?vozES.lang:'es-419';if(vozES)u.voice=vozES;
+  u.rate=.94;u.pitch=1.0;
+  speechSynthesis.speak(u);
+}
+function falar(t){
+  /* usa voz neural só se o usuário ativou no Perfil */
+  if(S.vozNeural){falarNeural(t);}else{falarLocal(t);}
+}
 if('speechSynthesis'in window){acharVoz();speechSynthesis.onvoiceschanged=acharVoz;}
 function destravar(){if(ttsOn||!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);ttsOn=true;}
 document.addEventListener('touchend',destravar,{once:true});document.addEventListener('click',destravar,{once:true});
 function falar(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=vozES?vozES.lang:'es-419';if(vozES)u.voice=vozES;u.rate=.9;speechSynthesis.speak(u);}
 function testarVoz(){falar('¡Qué más, parcero! Bienvenido a Colombia.');}
+function toggleNeural(){
+  S.vozNeural=!S.vozNeural;salvar();
+  const b=document.getElementById('btn-neural');
+  if(b)b.textContent=S.vozNeural?'🎧 Voz neural: ligada':'🎧 Voz neural: desligada';
+  toast(S.vozNeural?'Voz neural ligada — testando…':'Voltou pra voz do iPhone');
+  if(S.vozNeural)setTimeout(()=>falar('Ahora hablo con voz colombiana de verdad.'),200);
+}
+function syncNeuralBtn(){const b=document.getElementById('btn-neural');if(b)b.textContent=S.vozNeural?'🎧 Voz neural: ligada':'🎧 Voz neural: desligada';}
 
 /* ---------- nav ---------- */
 function ir(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');ir(b.dataset.scr);
-  if(b.dataset.scr==='scr-pf')renderPf();}));
+  if(b.dataset.scr==='scr-pf')renderPf();
+  if(b.dataset.scr==='scr-gabo')renderGabo();}));
 
 /* ---------- personagens ---------- */
 const CHARS={
@@ -876,22 +1028,57 @@ function resp(i,k){const p=POSTS[i];if(p._d)return;p._d=true;
   else{bs[k].classList.add('wrong');fb.className='fb bad';fb.textContent='A certa está em verde.';}
   ver(i);}
 
-/* ---------- sheet / chat ---------- */
+/* ---------- Conversa estilo Reels (orbe + legenda) ---------- */
 let cur='uber',hist=[];
+function orbEstado(e){const o=document.getElementById('orb');if(!o)return;
+  o.className='orb'+(e?' '+e:'');
+  const st=document.getElementById('orb-status');
+  if(st)st.textContent={listening:'🎙️ Te escuchando…',thinking:'💭 Pensando…',speaking:'🔊 Hablando…','':'Toca no microfone e fala'}[e||''];}
+function limpaCap(){document.getElementById('cap-es').innerHTML='';
+  const d=document.getElementById('cap-dica'),g=document.getElementById('cap-sug');
+  d.className='cap-dica';d.innerHTML='';g.className='cap-sug';g.innerHTML='';}
+
 function abrirSheet(key){
   if(!CHARS[key])key='cafe';
   cur=key;hist=[];const c=CHARS[key];
   document.getElementById('sh-av').textContent=c.av;
   document.getElementById('sh-nm').textContent=c.nm;
   document.getElementById('sh-role').textContent=c.role;
-  document.getElementById('sc').innerHTML='';
+  limpaCap();orbEstado('');
   document.getElementById('sheet').classList.add('up');
-  addMsg('them',c.open+`<span class="dica">💡 ${c.dica}</span>`);
   hist.push({role:'assistant',content:JSON.stringify({es:c.open,dica:c.dica,sugerencia:''})});
-  setTimeout(()=>falar(c.open),400);
+  mostrarResposta({es:c.open,dica:c.dica,sugerencia:''});
 }
-function fecharSheet(){document.getElementById('sheet').classList.remove('up');speechSynthesis.cancel();}
-function addMsg(cls,html){const s=document.getElementById('sc');const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;s.appendChild(d);s.scrollTop=s.scrollHeight;return d;}
+function fecharSheet(){document.getElementById('sheet').classList.remove('up');speechSynthesis.cancel();orbEstado('');}
+
+/* legenda que aparece letra a letra, com áudio automático em paralelo */
+function mostrarResposta(r){
+  const capES=document.getElementById('cap-es');
+  const capDica=document.getElementById('cap-dica');
+  const capSug=document.getElementById('cap-sug');
+  capES.innerHTML='<span class="cursor"></span>';
+  capDica.className='cap-dica';capDica.innerHTML='';
+  capSug.className='cap-sug';capSug.innerHTML='';
+
+  orbEstado('speaking');
+  falar(r.es);                       /* áudio automático */
+
+  const txt=r.es||'';let i=0;
+  clearInterval(mostrarResposta._t);
+  mostrarResposta._t=setInterval(()=>{
+    i++;
+    capES.innerHTML=txt.slice(0,i)+'<span class="cursor"></span>';
+    if(i>=txt.length){
+      clearInterval(mostrarResposta._t);
+      capES.innerHTML=txt;
+      /* dica e sugestão entram depois do texto */
+      if(r.dica){capDica.innerHTML='💡 '+r.dica;capDica.className='cap-dica on';}
+      if(r.sugerencia){capSug.innerHTML='🗣️ Tenta: "'+r.sugerencia+'"<span class="play" onclick="falar(\''+esc(r.sugerencia)+'\')">🔊</span>';capSug.className='cap-sug on';}
+      setTimeout(()=>{if(!recOn)orbEstado('');},1200);
+    }
+  },38);                             /* velocidade da digitação */
+}
+
 async function llamar(text){
   hist.push({role:'user',content:text});
   const sys=CHARS[cur].sys+`\nRESPONDE SOLO un JSON válido, sin markdown: {"es":"respuesta hablada corta","dica":"dica curta em português BR sobre a fala do usuário ou como responder melhor","sugerencia":"frase pronta em espanhol para o usuário usar agora, ou string vazia"}`;
@@ -901,10 +1088,7 @@ async function llamar(text){
   if(url&&!local){
     const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({system:sys,messages:hist,max_tokens:1000})});
-    if(!r.ok){
-      let det='';try{const e=await r.json();det=e.error||'';}catch(_){}
-      throw new Error('HTTP '+r.status+(det?' · '+det:''));
-    }
+    if(!r.ok){let det='';try{const e=await r.json();det=e.error||'';}catch(_){}throw new Error('HTTP '+r.status+(det?' · '+det:''));}
     const d=await r.json();raw=d.text||d.content||'';
   }else{
     const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -913,22 +1097,28 @@ async function llamar(text){
   }
   hist.push({role:'assistant',content:raw});if(hist.length>16)hist=hist.slice(-16);
   try{return JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){return{es:raw,dica:'',sugerencia:''};}}
+
 async function enviar(t){t=(t||'').trim();if(!t)return;
-  addMsg('me',t);document.getElementById('si').value='';
-  const w=addMsg('them','<span style="opacity:.5">escribiendo…</span>');
+  document.getElementById('si').value='';
+  /* mostra rapidamente o que VOCÊ disse, depois o orbe pensa */
+  document.getElementById('cap-es').textContent='Vos: '+t;
+  document.getElementById('cap-dica').className='cap-dica';
+  document.getElementById('cap-sug').className='cap-sug';
+  orbEstado('thinking');
   try{const r=await llamar(t);
-    w.innerHTML=`${r.es} <span class="rp" onclick="falar('${esc(r.es)}')">🔊</span>`+(r.dica?`<span class="dica">💡 ${r.dica}</span>`:'')+(r.sugerencia?`<span class="sug">🗣️ Tenta: "${r.sugerencia}"</span>`:'');
-    falar(r.es);S.turnos[cur]=(S.turnos[cur]||0)+1;salvar();ganharXP(15,'charla');}
+    S.turnos[cur]=(S.turnos[cur]||0)+1;salvar();ganharXP(15,'charla');stats();
+    mostrarResposta(r);}
   catch(e){
     const msg=String(e.message||e);
     let dica='';
-    if(/404/.test(msg))dica='A URL da função está errada. Pegue a "Function URL" no console do Firebase e cole em Perfil.';
-    else if(/403|401/.test(msg))dica='A função existe mas negou o acesso. Confira se ela está pública (allUsers / Cloud Run Invoker).';
-    else if(/500/.test(msg))dica='A função respondeu com erro — normalmente é a chave da Anthropic ou saldo. Veja os logs no Firebase.';
-    else if(/Failed to fetch|NetworkError|Load failed/.test(msg))dica='Não alcancei a função (CORS ou URL inexistente). Confirme a URL em Perfil.';
-    w.innerHTML='⚠️ Não consegui responder.<br><span style="font-size:13px;color:var(--rojo-ink)">'+msg+'</span>'
-      +(dica?'<br><span style="font-size:13px">'+dica+'</span>':'')
-      +'<br><span style="font-size:12px;color:var(--ink2)">URL usada: '+fnAtiva()+'</span>';
+    if(/404/.test(msg))dica='A URL da função está errada. Cole a "Function URL" em Perfil.';
+    else if(/403|401/.test(msg))dica='A função negou acesso. Confira se está pública (allUsers).';
+    else if(/500/.test(msg))dica='A função quebrou — geralmente a chave da Anthropic ou saldo. Veja os logs.';
+    else if(/Failed to fetch|NetworkError|Load failed/.test(msg))dica='Não alcancei a função (CORS/URL). Confirme a URL em Perfil.';
+    orbEstado('');
+    document.getElementById('cap-es').innerHTML='⚠️ Não consegui responder';
+    const cd=document.getElementById('cap-dica');
+    cd.className='cap-dica on';cd.innerHTML=msg+(dica?'<br>'+dica:'');
   }}
 document.getElementById('ss').addEventListener('click',()=>enviar(document.getElementById('si').value));
 document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')enviar(e.target.value);});
@@ -944,7 +1134,7 @@ if(SR){
   rec.interimResults=true;      /* mostra o texto enquanto você fala */
   rec.maxAlternatives=1;
 
-  rec.onstart=()=>{recOn=true;mic.classList.add('rec');setStatus('🎙️ Escuchando… habla ahora','var(--rojo)');};
+  rec.onstart=()=>{recOn=true;mic.classList.add('rec');setStatus('🎙️ Escuchando… habla ahora','var(--rojo)');orbEstado('listening');};
   rec.onaudiostart=()=>setStatus('🎙️ Gravando… pode falar','var(--rojo)');
   rec.onspeechstart=()=>setStatus('🎙️ Ouvindo você…','var(--rojo)');
 
@@ -962,7 +1152,7 @@ if(SR){
     recOn=false;mic.classList.remove('rec');clearTimeout(recTO);
     const v=document.getElementById('si').value.trim();
     if(v){setStatus('');enviar(v);}
-    else setStatus('Não captei nada. Tenta de novo ou escreve abaixo 👇');
+    else {setStatus('Não captei nada. Tenta de novo ou escreve abaixo 👇');orbEstado('');}
   };
 
   rec.onerror=ev=>{
@@ -1051,6 +1241,7 @@ const HLS=[{id:'uber',i:'🚗',n:'Uber'},{id:'hotel',i:'🛎️',n:'Hotel'},{id:
 let pfTab='salvos';
 function renderPf(){
   renderProgresso();
+  syncNeuralBtn();
   document.getElementById('hls').innerHTML=HLS.map(h=>`<button class="hh ${S.turnos[h.id]?'':'off'}" onclick="abrirSheet('${h.id}')"><div class="c">${h.i}</div><p>${h.n}</p></button>`).join('');
   const idx=Object.keys(pfTab==='salvos'?S.saves:S.vistos).filter(k=>!isNaN(k)).map(Number);
   const g=document.getElementById('pfgrid');
@@ -1077,6 +1268,86 @@ document.getElementById('cfg-car').value=S.fotos.cartagena||'';
    os posts, todos os stories e conversou pelo menos 3
    vezes com cada um dos 4 personagens.
    ===================================================== */
+/* =====================================================
+   MÓDULO GABO — español costeño (nível intermediário)
+   Vocabulário costeño + cultura caribenha do universo de
+   García Márquez. NENHUM trecho literal das obras é usado.
+   ===================================================== */
+const GABO={
+  vocab:[
+    {es:"el pueblo",pt:"o povoado / a vila — cenário típico do Caribe interiorano"},
+    {es:"la ciénaga",pt:"o pântano / brejo — paisagem clássica da costa"},
+    {es:"el compadre",pt:"o compadre — laço de amizade forte, quase família"},
+    {es:"la hamaca",pt:"a rede de dormir — essencial no calor costeño"},
+    {es:"el aguacero",pt:"o toró — chuva forte e repentina do Caribe"},
+    {es:"la vaina",pt:"a coisa / o troço / a treta — curinga costeño"},
+    {es:"berraco",pt:"fera / durão / impressionante — elogio forte"},
+    {es:"mamar gallo",pt:"zoar / brincar / enrolar alguém"},
+    {es:"la parranda",pt:"a farra — festa longa com música e trago"},
+    {es:"¡No joda!",pt:"'Não amola!' / 'Poxa!' — interjeição costeña clássica"}
+  ],
+  cultura:[
+    {t:"Macondo",d:"O povoado imaginário de García Márquez, inspirado em Aracataca, sua terra natal. Virou símbolo do realismo mágico: o cotidiano e o extraordinário lado a lado."},
+    {t:"Realismo mágico",d:"Estilo em que o sobrenatural é tratado com naturalidade — sem que ninguém se espante. É a marca da literatura de Gabo e de toda uma geração latino-americana."},
+    {t:"El vallenato",d:"A música da costa, com acordeão. Gabo dizia que seu romance mais famoso era um vallenato de 400 páginas. Ouvir vallenato é ouvir o costeño no ritmo."},
+    {t:"Costa × interior",d:"O costeño (Cartagena, Barranquilla) fala rápido, come o 's' e brinca muito. Bogotá, o 'cachaco', é mais formal. Gabo era costeño com orgulho."}
+  ],
+  quiz:[
+    {q:"No Caribe, 'no me mames gallo' quer dizer:",ops:["Não me deixe com fome","Não me zoe / fala sério","Não me acorde"],ok:1},
+    {q:"'Cayó un aguacero' significa que:",ops:["Caiu um toró (chuva forte)","Alguém caiu no chão","Acabou a comida"],ok:0},
+    {q:"'Esa vaina' é jeito costeño de dizer:",ops:["Aquela mulher","Aquela coisa / troço","Aquele lugar"],ok:1},
+    {q:"Macondo, na obra de García Márquez, é:",ops:["Uma cidade da Espanha","Um povoado imaginário do Caribe","Um tipo de dança"],ok:1},
+    {q:"Chamar alguém de 'berraco' na costa é:",ops:["Um elogio (fera, durão)","Um xingamento grave","Dizer que está doente"],ok:0},
+    {q:"'Mi compadre' expressa:",ops:["Um desconhecido","Um laço de amizade forte","Um chefe"],ok:1}
+  ]
+};
+const GABO_CHAR={av:"📖",nm:"aureliano_costeño",role:"un viejo de la costa · en línea",
+  sys:`Eres un viejo costeño de un pueblo caribeño colombiano parecido a Macondo, sabio y conversador, en el espíritu de las historias de García Márquez (SIN citar textualmente sus obras). Hablas español costeño real: rápido, cálido, a veces te comes la 's' final, usas 'vaina', 'compadre', 'ajá', 'no joda', 'berraco'. Le cuentas al viajero brasileño cosas del pueblo, del calor, de la ciénaga, de las parrandas y del vallenato. Frases CORTAS, máximo 2. Corrige con cariño. NUNCA reproduzcas frases literales de los libros.
+RESPONDE SOLO un JSON válido, sin markdown: {"es":"respuesta corta en costeño","dica":"dica curta em português BR sobre a fala ou uma curiosidade cultural","sugerencia":"frase pronta em espanhol costeño, ou string vazia"}`,
+  open:"¡Ajá, llegó el viajero! Siéntese en la hamaca, que aquí el calor no perdona. ¿De dónde viene, compadre?",
+  dica:"Ele te chamou de 'compadre' e perguntou de onde você vem. Responde: 'Vengo de Brasil, compadre.'"};
+CHARS.gabo=GABO_CHAR;   /* liga o roleplay ao mesmo motor de chat */
+
+function renderGabo(){
+  const el=document.getElementById('gabo-scroll');if(!el)return;
+  let h=`<div class="gabo-hero"><div class="tag">Nivel intermedio · español costeño</div>
+    <h2>El Caribe de Gabo</h2>
+    <p>García Márquez nasceu em Aracataca, na costa. O espanhol de lá — o costeño — é quente, rápido e musical. Suba de nível com o vocabulário e a cultura dessa região.</p>
+    <div class="mari">🦋</div></div>`;
+
+  h+=`<div class="gabo-sec">Vocabulario costeño</div>`;
+  h+=GABO.vocab.map((v,i)=>`<div class="gcard">
+    <div class="es">${v.es} <span class="ex-play" onclick="falar('${v.es.replace(/'/g,"\\'")}')">🔊</span></div>
+    <div class="pt">${v.pt}</div></div>`).join('');
+
+  h+=`<div class="gabo-sec">Cultura & realismo mágico</div>`;
+  h+=GABO.cultura.map(c=>`<div class="gcult"><h4>${c.t}</h4><p>${c.d}</p></div>`).join('');
+
+  h+=`<div class="gabo-sec">Pon a prueba</div>`;
+  h+=GABO.quiz.map((q,i)=>`<div class="gq" id="gq${i}">
+    <div class="qh">${q.q}</div>
+    ${q.ops.map((o,k)=>`<button class="qo" onclick="gaboResp(${i},${k})">${o}</button>`).join('')}
+    <div class="qfb" id="gqfb${i}"></div></div>`).join('');
+
+  h+=`<div class="gabo-sec">Conversación</div>`;
+  h+=`<div class="grp" onclick="abrirSheet('gabo')">
+    <div class="rt">📖 Habla con un viejo de la costa</div>
+    <div class="rd">Um velho costeño, no espírito de Macondo, te conta do pueblo e do calor — em espanhol caribenho de verdade.</div>
+    <div class="rb">🎙️ Empezar la charla</div></div>`;
+
+  h+=`<div class="glegal">🔒 Este módulo ensina vocabulário e cultura inspirados no universo de García Márquez. Não reproduz trechos das obras, que são protegidas por direitos autorais. Para ler os livros, procure edições oficiais.</div>`;
+
+  el.innerHTML=h;
+}
+function gaboResp(i,k){
+  const q=GABO.quiz[i];if(q._d)return;q._d=true;
+  const bs=document.querySelectorAll('#gq'+i+' .qo');bs.forEach(b=>b.style.pointerEvents='none');
+  bs[q.ok].classList.add('right');
+  const fb=document.getElementById('gqfb'+i);
+  if(k===q.ok){fb.className='qfb ok';fb.textContent='¡Ajá, así es!';S.gaboFeito=S.gaboFeito||{};S.gaboFeito['q'+i]=1;salvar();ganharXP(15,'quiz costeño');}
+  else{bs[k].classList.add('wrong');fb.className='qfb bad';fb.textContent='La correcta está en verde, compadre.';}
+}
+
 const META_TURNOS=3;
 function progresso(){
   const postsTot=POSTS.length;
@@ -1233,7 +1504,7 @@ function apagarPerfil(nome){
   }
 })();
 
-const VERSAO='2026-07-21 · perfis+intro';
+const VERSAO='2026-07-21 · Gabo+voz+orbe-Reels';
 (function(){const e=document.getElementById('ver-app');if(e)e.textContent=VERSAO;})();
 renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 </script>
