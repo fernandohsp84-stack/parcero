@@ -535,7 +535,7 @@ button{font-family:inherit}
 
   <section class="screen" id="scr-pf">
     <div class="pf">
-      <div class="topbar"><span class="logo" style="font-size:17px"><span class="mark bird" style="width:27px;height:27px"></span>tu_viaje_co</span></div>
+      <div class="topbar"><span class="logo" style="font-size:17px"><span class="mark bird" style="width:27px;height:27px"></span><span id="pf-headername">Parcero</span></span></div>
       <div class="pftop">
         <div class="pfav"><div class="in">🐻</div></div>
         <div class="nums">
@@ -669,7 +669,7 @@ Object.keys(BASES).forEach(k=>{
    entregam um endereço .a.run.app), cole a URL correta em
    Perfil → Cloud Function, que ela sobrescreve esta.
    ===================================================== */
-const FN_PADRAO='https://southamerica-east1-parcero-71c5d.cloudfunctions.net/parcero';
+const FN_PADRAO='https://parcero-zlzafg45cq-rj.a.run.app';
 function fnAtiva(){return (S.fnUrl&&S.fnUrl.trim())||FN_PADRAO;}
 const S={xp:0,streak:0,ultDia:null,likes:{},saves:{},vistos:{},turnos:{},fnUrl:'',fotos:{},gaboFeito:{},vozNeural:true};
 /* =====================================================
@@ -1249,6 +1249,7 @@ let pfTab='salvos';
 function renderPf(){
   renderProgresso();
   syncNeuralBtn();
+  const hn=document.getElementById('pf-headername');if(hn)hn.textContent=PERFIL&&PERFIL!=='padrao'?PERFIL:'Parcero';
   document.getElementById('hls').innerHTML=HLS.map(h=>`<button class="hh ${S.turnos[h.id]?'':'off'}" onclick="abrirSheet('${h.id}')"><div class="c">${h.i}</div><p>${h.n}</p></button>`).join('');
   const idx=Object.keys(pfTab==='salvos'?S.saves:S.vistos).filter(k=>!isNaN(k)).map(Number);
   const g=document.getElementById('pfgrid');
@@ -1451,13 +1452,43 @@ function resumoPerfil(nome){
 }
 function renderQuien(){
   const l=listaPerfis();
-  document.getElementById('qlista').innerHTML=l.map(n=>
+  let extra='';
+  /* se existe progresso 'órfão' (feito antes de cadastrar o nome) e ele
+     não foi ainda vinculado, oferece recuperar esse progresso */
+  try{
+    const orf=localStorage.getItem('parcero_dados_padrao');
+    const jaTem=l.includes('padrao');
+    if(orf&&!jaTem){
+      const d=JSON.parse(orf);
+      if(d&&(d.xp>0||Object.keys(d.vistos||{}).length>0)){
+        const n=Math.floor((d.xp||0)/100)+1;
+        extra=`<div class="pbtn" style="border-color:var(--azul)" onclick="recuperarOrfao()">
+          <span class="ini" style="background:var(--verde)">↻</span>
+          <span>Recuperar meu progresso</span>
+          <span class="meta">Nivel ${n} · ${d.xp||0} XP</span></div>`;
+      }
+    }
+  }catch(e){}
+  document.getElementById('qlista').innerHTML=extra+l.map(n=>
     `<div class="pbtn" onclick="usarPerfil('${n.replace(/'/g,"\\'")}')">
       <span class="ini">${n.charAt(0).toUpperCase()}</span>
       <span>${n}</span>
       <span class="meta">${resumoPerfil(n)}</span>
       <button class="del" onclick="event.stopPropagation();apagarPerfil('${n.replace(/'/g,"\\'")}')">🗑️</button>
-    </div>`).join('')||'<div class="sub" style="margin:0">Ninguém cadastrado ainda.<br>Crie o primeiro perfil abaixo 👇</div>';
+    </div>`).join('')||(extra?'':'<div class="sub" style="margin:0">Ninguém cadastrado ainda.<br>Crie o primeiro perfil abaixo 👇</div>');
+}
+function recuperarOrfao(){
+  const nome=(prompt('Com que nome salvar esse progresso?','Fernando')||'').trim();
+  if(!nome)return;
+  const l=listaPerfis();
+  try{
+    const orf=localStorage.getItem('parcero_dados_padrao');
+    if(orf)localStorage.setItem('parcero_dados_'+nome,orf);
+    localStorage.removeItem('parcero_dados_padrao');
+  }catch(e){}
+  if(!l.includes(nome)){l.push(nome);gravarLista(l);}
+  usarPerfil(nome);
+  toast('Progresso recuperado como '+nome);
 }
 function abrirQuien(){
   renderQuien();
@@ -1511,7 +1542,7 @@ function apagarPerfil(nome){
   }
 })();
 
-const VERSAO='2026-07-21 · voz-premium-padrao+orbe-menor';
+const VERSAO='2026-07-21 · url-run-app+voz-premium';
 (function(){const e=document.getElementById('ver-app');if(e)e.textContent=VERSAO;})();
 renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 </script>
