@@ -824,20 +824,31 @@ function salvarFotos(){
 /* ---------- voz ---------- */
 let vozES=null,ttsOn=false;
 function acharVoz(){const v=speechSynthesis.getVoices();
-  /* prioriza vozes de melhor qualidade (Enhanced/Premium) e colombianas */
-  const co=v.filter(x=>/es[-_]CO/i.test(x.lang));
+  /* casa es-CO exato primeiro, depois es-MX, depois qualquer es;
+     dentro de cada grupo, prioriza vozes premium/natural */
+  const exata=v.filter(x=>/es[-_]CO/i.test(x.lang));
   const mx=v.filter(x=>/es[-_]MX/i.test(x.lang));
   const es=v.filter(x=>/^es/i.test(x.lang));
-  const melhor=arr=>arr.find(x=>/(enhanced|premium|neural|siri)/i.test(x.name))||arr[0];
-  vozES=melhor(co)||melhor(mx)||melhor(es)||null;}
-/* cache de áudios neurais já baixados, pra não repetir chamada */
+  const premium=arr=>arr.find(x=>/(enhanced|premium|neural|siri|natural)/i.test(x.name))||arr[0];
+  vozES=premium(exata)||premium(mx)||premium(es)||null;}
+
+/* iOS só libera áudio depois do 1º toque do usuário. Sem isto,
+   a primeira fala costuma sair muda. "Esquenta" o motor de voz. */
+let vozLiberada=false;
+function liberarVoz(){
+  if(vozLiberada||!('speechSynthesis'in window))return;
+  try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);vozLiberada=true;}catch(e){}
+}
+document.addEventListener('touchend',liberarVoz,{once:true});
+document.addEventListener('click',liberarVoz,{once:true});
+
+/* cache de áudios neurais por idioma+texto, pra não repetir chamada */
 const audioCache={};
 function falarNeural(t){
   const url=fnAtiva();
-  if(audioCache[t]){audioCache[t].currentTime=0;audioCache[t].play();return;}
-  /* fala já com a voz do iPhone (sem atraso) e, se a neural chegar,
-     usa a neural na próxima vez que a mesma frase tocar */
-  let neuralChegou=false;
+  const chave='es-CO|'+t;
+  if(audioCache[chave]){try{speechSynthesis.cancel();}catch(e){}audioCache[chave].currentTime=0;audioCache[chave].play().catch(()=>{});return;}
+  /* fala já com a voz do iPhone (sem atraso) e, se a neural chegar, troca */
   falarLocal(t);
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({tts:t,voz:'es-CO'})})
@@ -845,10 +856,9 @@ function falarNeural(t){
     .then(d=>{
       if(!d||!d.audio)return;              /* sem chave TTS: fica na voz local */
       const a=new Audio('data:audio/mp3;base64,'+d.audio);
-      audioCache[t]=a;
-      /* se a voz local ainda estiver falando, troca pela neural */
+      audioCache[chave]=a;
       try{speechSynthesis.cancel();}catch(e){}
-      a.play();
+      a.play().catch(()=>{});
     })
     .catch(()=>{});                        /* falha: já falou local, nada a fazer */
 }
@@ -857,7 +867,7 @@ function falarLocal(t){
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(t);
   u.lang=vozES?vozES.lang:'es-419';if(vozES)u.voice=vozES;
-  u.rate=.94;u.pitch=1.0;
+  u.rate=.92;u.pitch=1.0;
   speechSynthesis.speak(u);
 }
 function falar(t){
@@ -1542,7 +1552,7 @@ function apagarPerfil(nome){
   }
 })();
 
-const VERSAO='2026-07-21 · url-run-app+voz-premium';
+const VERSAO='2026-07-21 · voz-Ruta+liberar-iOS';
 (function(){const e=document.getElementById('ver-app');if(e)e.textContent=VERSAO;})();
 renderStories();renderFeed();renderList();renderPf();stats();renderDiag();
 </script>
